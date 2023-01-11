@@ -1,0 +1,65 @@
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+TITLE
+Energy loss of muons traversing 3m through iron
+* 
+* prescision simulation choosen
+DEFAULTS                                                              PRECISIO
+*
+* beam definition: 1 TeV/c muons
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+BEAM          1000.0       0.0       0.0                              MUON+
+BEAMPOS                             -0.1
+*
+*
+*
+* Geometry in free format used: parallelepiped filled with iron (Fe)
+*
+GEOBEGIN                  0.01                                        COMBNAME
+    0    0             Parallelepiped target
+* 
+* First we define the bodies in the geometry: blackbody and void sphere
+SPH BLK      0.0 0.0 0.0 10000.0
+SPH VOID     0.0 0.0 0.0 1000.0
+* The iron (Fe) box 3m in the z-direction (beam direction)
+RPP TARG     -20.0 20.0 -20.0 20.0 0.0 30.0
+*
+END
+* -----
+* Definition of the regions we need
+* 
+BLKBODY      5 +BLK -VOID
+VOID         5 +VOID -TARG
+TARGET       5 +TARG 
+*
+END
+GEOEND
+*
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+* Add materials in percent weight of the earths crust
+* ----------------
+MATERIAL        19.0   39.0983     0.862      26.0       0.0       0.0POTASSIU
+MATERIAL                            2.80                              ROCK
+COMPOUND       -46.6    OXYGEN    -27.72   SILICON     -8.13  ALUMINUMROCK
+COMPOUND        -5.0      IRON     -3.63   CALCIUM     -2.83    SODIUMROCK
+COMPOUND       -2.59  POTASSIU     -2.09  MAGNESIU                    ROCK
+*
+* Assign materials: Fe for target, blackhole and vacuum
+*
+ASSIGNMA    BLCKHOLE   BLKBODY
+ASSIGNMA      VACUUM      VOID
+ASSIGNMA        ROCK    TARGET
+*
+* MGDRAW tested at this point
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+USERDUMP       200.0                 2.0     100.0                    SRCEFILE
+*
+* Scoring: obtain the number of muons against the leftover final momentum 
+*          when leaving the 3m iron block
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+*USRBDX         101.0     MUON+      42.0    TARGET      VOID       1.0MuonFLu
+*USRBDX        1000.0     950.0     100.0                              &
+*
+RANDOMIZ         1.0    100.00
+START           50.0                                     
+STOP
+

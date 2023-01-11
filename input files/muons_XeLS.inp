@@ -1,0 +1,91 @@
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+TITLE
+Creation of isotopes from 268 GeV muons traversing through XE-LS
+* 
+* Prescision simulation choosen
+DEFAULTS                                                              PRECISIO
+*
+* Beam definition: 268 GeV muons
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+BEAM          -268.0       0.0       0.0                              MUON+
+BEAMPOS                             -0.1
+* source used of source_unf1 to create uniform distribution of muons: 268+-2
+*SOURCE
+*
+*
+* Geometry in free format used: parallelepiped filled with iron (Fe)
+*
+GEOBEGIN                  0.01                                        COMBNAME
+    0    0             Right Circular Cylinder target
+* 
+* First we define the bodies in the geometry: blackbody and void sphere
+RPP BLK      -50000.0 50000.0 -50000.0 50000.0 -80000.0 80000.0
+RPP VOID     -10000.0 10000.0 -10000.0 10000.0 -20000.0 20000.0
+* The Xe-LS filled cylinder of 10m radius and 40m in the beam direction (z)
+RCC TARG     0.0 0.0 0.0 0.0 0.0 4000.0 1000.0
+*
+END
+* -----
+* Definition of the regions we need
+* 
+BLKBODY      5 +BLK -VOID
+VOID         5 +VOID -TARG
+TARGET       5 +TARG 
+*
+END
+GEOEND
+*
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+* Material and compound definitions of Xe doped Liquid Scintillator
+* ----------------
+MATERIAL                           0.733                              DECANE
+COMPOUND         10.    CARBON       22.  HYDROGEN                    DECANE
+MATERIAL                            0.88                              PSEUDO
+COMPOUND          9.    CARBON       12.  HYDROGEN                    PSEUDO
+MATERIAL                           1.904                              PPO
+COMPOUND         15.    CARBON       11.  HYDROGEN        1.  NITROGENPPO
+COMPOUND          1.    OXYGEN                                        PPO
+MATERIAL        54.0            2.221E-2                 0.0      136.136-XE
+MATERIAL        54.0             2.13E-3                 0.0      134.134-XE
+MATERIAL        54.0              4.0E-5                 0.0      132.132-XE
+* Enriched xenon gas by weight
+MATERIAL                         0.02437                              ENR-XE
+COMPOUND     -0.9111    136-XE   -0.0872    134-XE   -0.0017    132-XEENR-XE
+* LS contributions by volume
+MATERIAL                           0.756                              DECPSEU
+COMPOUND       -0.82   -DECANE     -0.18   -PSEUDO                    DECPSEU
+* PPO added by volume
+MATERIAL                         0.77736                              LS
+COMPOUND   -2.194E-3      -PPO   -0.9978  -DECPSEU                    LS
+* Total Xe doped Liquid Scintillator by weight
+MATERIAL                         0.78013                              XE-LS
+COMPOUND     -0.0313    ENR-XE   -0.9687        LS                    XE-LS
+* ----------------
+*
+* Assign materials: XE-LS for target, blackhole and vacuum
+*
+ASSIGNMA    BLCKHOLE   BLKBODY
+ASSIGNMA      VACUUM      VOID
+ASSIGNMA       XE-LS    TARGET
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+* Extra physics models that have to be turned on
+PHOTONUC         1.0                        DECANE     XE-LS    
+PHOTONUC         1.0                        DECANE     XE-LS          ELECTNUC   
+PHYSICS          1.0                                                  COALESCE
+PHYSICS          2.0                                                  EM-DISSO
+PHYSICS          3.0                                                  EVAPORAT
+IONTRANS        -2.0
+* Newly added physics models
+PHYSICS                                                               DPMTHRES
+PHYSICS          1.0                                                  ISOMERS
+PHYSICS       1000.0    1000.0    1000.0    1000.0    1000.0    1000.0PEATHRESH
+LOW-PWXS         1.0                        DECANE     XE-LS
+*
+* MGDRAW, EEDRAW and BXDRAW of mgdraw.f are called, output dumped in SRCEFILE
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+USERDUMP       200.0                 2.0     100.0                    SRCEFILE
+*
+RANDOMIZ         1.0    100.00
+START           50.0                                     
+STOP
+
