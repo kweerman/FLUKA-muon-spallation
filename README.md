@@ -1,12 +1,12 @@
 # FLUKA input
 
-Simulation of muon spallation in xenon doped liquid scintillator. The isotope production and number of neutrons per event is returned with MGDRAW. MDSTCK is also used to count the creation of neutrons and compare to the results of MGDRAW. Note that the USERDUMP line in the input file calls to MGDRAW, while MDSTCK is automatically called after every interaction. There are two maps containing different versions of MGDRAW: one where the tracks of all events are saved and plotted - "full event tracking" - and one where only the information on heavy elements and neutrons is saved - "neutron and isotope count".
+Simulation of muon spallation in xenon doped liquid scintillator. The isotope production and number of neutrons per event is returned with MGDRAW. MDSTCK is also used to count the creation of neutrons and compare to the results of MGDRAW. Note that the USERDUMP line in the input file calls to MGDRAW, while MDSTCK is automatically called after every interaction. There are two folders containing different versions of MGDRAW: one where the tracks of all events are saved and plotted - "full event tracking" - and one where only the information on heavy elements and neutrons is saved - "neutron and isotope count".
 
-## Map: full event tracking
+### Folder: full event tracking
 
 The tracks of the events are reconstructed with MGDRAW and saved in an unformatted file called SRCEFILE. The python script eventscreator.py is used to loop through SRCEFILE and copy all events where an isotope heavier than helium is created into a new file. In addition the isotopes are counted for every created isotope the A and Z are printed together with the creation count onto the log file. The script qsub_fluka_tmp.py can be used to call to FLUKA multiple times and automatically let eventscreator.py go through the results. Lastly the events can be plotted with plot_creator.py and qsub_plot.py.
 
-## Map: Neutron and isotope count
+### Folder: neutron and isotope count
 
 MGDRAW is used to return a file where only the tracks of neutrons and isotopes heavier than helium are returned (see the if-statements of MGDRAW). Thereafter the script eventscreator.py can be used to count the number of isotopes and neutrons and print them onto the log file. Note that for the neutron count we check if it is not the same neutron as before by checking if the new track coordinates are not the same as before (this might also still need to be done for the isotopes). MDSTCK is used also to count the number of neutrons and returns more than with MGDRAW.
 
