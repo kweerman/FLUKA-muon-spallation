@@ -26,3 +26,5 @@ $FLUPRO/flutil/ldpmqmd -o mydraw4_unform -m fluka mgdraw_vers4_unform.o mdstck.o
 **FLUKA should be called as follow:**\
 $FLUPRO/flutil/rfluka -e $FLUPRO/flutil/mydraw_vers2 -N0 -M1 muons_XeLS \
 $FLUPRO/flutil/rfluka -e $FLUPRO/flutil/mydraw4_unform -N0 -M1 muons_XeLS 
+
+Test
