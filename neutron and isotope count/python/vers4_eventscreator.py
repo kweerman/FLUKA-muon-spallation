@@ -1,7 +1,8 @@
-# Version 4 2022 Kelly Weerman: mdstck included and neutron count
-# SRCEFILE only includes neutrons and heavy elements
+# Version 4 2022 Kelly Weerman
 # creates an unformatted file containing track coordinates and information of
 # events with elements heavier than helium
+# creates a file with [neutron_count, no_events with heavy elements, isotope list]
+# isotope list in the form [A, Z, count]
 import matplotlib.pyplot as plt
 import zipfile
 import io
@@ -10,7 +11,7 @@ import numpy as np
 import pickle
 
 
-def events_creator(filename, event_filename):
+def events_creator(filename, event_filename, isotope_filename):
     # read out the values of the fort file and returns a file with events
     # where elements heavier than helium are created: event_file
 
@@ -139,13 +140,18 @@ def events_creator(filename, event_filename):
 
     event_file.close()
     file1.close()
+
+    isotope_file = open(isotope_filename,'wb')
+    pickle.dump([neutron_count, no_figs, totAZ_count], isotope_file)
+    isotope_file.close()
+
     print("The number of neutrons created is {0}".format(neutron_count))
     print("For {0} events the elements are given by {1} ".format(no_figs, totAZ_count))
     return no_figs, resAZ
 
 # when calling this file use the following format in terminal:
 # python vers2_eventscreator.py filename event_filename
-file_name, event_filename = sys.argv[1], sys.argv[2]
-events_creator(file_name, event_filename)
+file_name, event_filename, isotope_filename = sys.argv[1], sys.argv[2], sys.argv[3]
+events_creator(file_name, event_filename, isotope_filename)
 
 

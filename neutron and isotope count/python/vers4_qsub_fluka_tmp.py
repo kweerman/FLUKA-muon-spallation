@@ -59,6 +59,7 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
         # in addition the unformatted neutron file is defined for the no neutrons
         userdump_file = '{0}{1}001_{2}'.format(copy_file,cycle,fort_name)
         event_file = '{0}_importantbatch{1}'.format(copy_file,cycle)
+        AZ_file = '{0}_isotopes{1}'.format(copy_file,cycle)
         neutron_file = '{0}{1}001_NEUTRO'.format(copy_file,cycle)
         python_filepath = '/project/xenon/kweerman/exercises/'
 
@@ -70,10 +71,10 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
         script1 = '$FLUPRO/flutil/rfluka -e $FLUPRO/flutil/mydraw4_unform -N0 -M1 ' + new_inp
 
         # from this line the no neutrons and elemnts created will be printed in the log file
-        script2 = 'python {0}vers4_eventscreator.py {1} {2}'.format(python_filepath, userdump_file, event_file)
+        script2 = 'python {0}vers4_eventscreator.py {1} {2} {3}'.format(python_filepath, userdump_file, event_file, AZ_file)
 
         # we move all necesarry output to the dcache folder
-        script3 = 'mv {0} {1} {2} {3}'.format(userdump_file, event_file, neutron_file, out_folder)
+        script3 = 'mv {0} {1} {2} {3} {4}'.format(userdump_file, event_file, neutron_file, AZ_file, out_folder)
         script4 = 'mv {0}{1}001.err {0}{1}001.log {0}{1}001.out \
                         ran{0}{1}001 ran{0}{1}002 {2} {3}'.format(copy_file,cycle,new_inp,files_folder)
         script_file_content = script_template.format(inp_file=inp_file, path=job_folder, 
@@ -95,9 +96,9 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
       
 
 path = '/project/xenon/kweerman/exercises/MGDRAW/'
-out_folder = '/dcache/xenon/kweerman/XeLSFAST/'
+out_folder = '/dcache/xenon/kweerman/XeLSFAST2/'
 job_folder, log_folder = path + 'input_files/', out_folder + 'log_files_fluka/'
 files_folder = out_folder + 'extra_files_fluka'
-submit_flukaruns(path, 'muons_XeLS50.inp', 'out_muonsXeLS50', 
+submit_flukaruns(path, 'muons_XeLS500.inp', 'out_muonsXeLS500', 
                     job_folder, out_folder, log_folder, files_folder, 'SRCEFILE',8)
 
