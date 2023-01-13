@@ -18,7 +18,7 @@ cd $TMPDIR
 {script3}
 {script4}
 echo "------------------------------------------------------------------------"
-echo "python vers2_eventscreator.py called for {userdump_file}"
+echo "python vers4_eventscreator.py called for {userdump_file}"
 echo "Job ended on" `date`
 echo "------------------------------------------------------------------------"
 """
@@ -43,10 +43,7 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
 
     # create new files where the number of random seeds is differently
     for cycle in range(1, cycles + 1):
-        if cycle > 9:
-            filedata_out = filedate_in.replace("100.00","1%i.00"%(cycle))
-        else:
-            filedata_out = filedate_in.replace("100.00","10%i.00"%(cycle))
+        filedata_out = filedate_in.replace("100.00","1%i."%(cycle))
 
         # create the dublicate files with different numbers and add new lines
         new_inp = job_folder + copy_file + '{0}.inp'.format(cycle)
@@ -96,9 +93,9 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
       
 
 path = '/project/xenon/kweerman/exercises/MGDRAW/'
-out_folder = '/dcache/xenon/kweerman/XeLSFAST2/'
+out_folder = '/dcache/xenon/kweerman/XeLS50000/'
 job_folder, log_folder = path + 'input_files/', out_folder + 'log_files_fluka/'
 files_folder = out_folder + 'extra_files_fluka'
-submit_flukaruns(path, 'muons_XeLS500.inp', 'out_muonsXeLS500', 
-                    job_folder, out_folder, log_folder, files_folder, 'SRCEFILE',8)
+submit_flukaruns(path, 'muons_XeLS50000.inp', 'out_muonsXeLS50000', 
+                    job_folder, out_folder, log_folder, files_folder, 'SRCEFILE',10)
 
