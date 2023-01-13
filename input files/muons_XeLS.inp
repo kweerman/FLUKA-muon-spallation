@@ -5,13 +5,14 @@ Creation of isotopes from 268 GeV muons traversing through XE-LS
 * Prescision simulation choosen
 DEFAULTS                                                              PRECISIO
 *
-* Beam definition: 268 GeV muons
 * ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
-BEAM          -268.0       0.0       0.0                              MUON+
-BEAMPOS                             -0.1
-* source used of source_unf1 to create uniform distribution of muons: 268+-2
-*SOURCE
+BEAM         -1.0e+5                                                  MUON+
+BEAMPOS          0.0       0.0   -2.0e+3       0.0       0.0
 *
+* source used of source_muons to create distribution of muons at KamLAND
+OPEN            99.                                                   OLD
+/project/xenon/kweerman/exercises/MuonFlux-KamLAND-Generate.dat
+SOURCE          99.
 *
 * Geometry in free format used: parallelepiped filled with iron (Fe)
 *
