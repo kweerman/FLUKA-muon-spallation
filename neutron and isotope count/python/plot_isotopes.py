@@ -3,8 +3,10 @@
 # plots a histogram of A as a function of Z and prints the count per isotope and total neutron count
 # isotope list in the form [[A1, Z1, count],[A2, Z2, count], ...]
 import pickle
-import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+from operator import itemgetter
+import csv
 
 def pickleLoader(pklFile):
     try:
@@ -64,8 +66,9 @@ def histogram(file_names, job_range=[1,10], figure_name="AZhistogram"):
     total_neutrons, tot_events, totAZ_count, Z_list, A_list = isotope_list(file_names, job_range)
 
     print("The number of neutrons is {0}".format(total_neutrons))
-    print("For {0} events the isotope list created is {1}".format(tot_events, totAZ_count))
-    plt.hist2d(Z_list, A_list, bins=[60,140], cmin=1)
+    #print("For {0} events the isotope list created is {1}".format(tot_events, totAZ_count))
+    plt.hist2d(Z_list, A_list, bins=[60,140], norm=mpl.colors.LogNorm(), cmin=1)
+    #plt.hist2d(Z_list, A_list, bins=[60,140], cmin=1)
     plt.xlim([0,60])
     plt.ylim([0,140])
     plt.xlabel("Z")
@@ -73,7 +76,76 @@ def histogram(file_names, job_range=[1,10], figure_name="AZhistogram"):
     plt.colorbar(label="count")
     plt.savefig(figure_name)
 
-job_range = [1,20]
-file_names = ["/dcache/xenon/kweerman/XeLS100000/out_muonsXeLSLong_isotopes", "/dcache/xenon/kweerman/XeLS50000/out_muonsXeLS50000_isotopes"]
-figure_name = "AZhistogram"
-histogram(file_names, job_range, figure_name)
+    return total_neutrons, tot_events, totAZ_count, Z_list, A_list
+
+#job_range = [1,20]
+#file_names = ["/dcache/xenon/kweerman/XeLS100000/out_muonsXeLSLong_isotopes", "/dcache/xenon/kweerman/XeLS50000/out_muonsXeLS50000_isotopes"]
+#figure_name = "AZhistogram"
+#job_range = [1,20]
+#file_names = ["/dcache/xenon/kweerman/TEST10^5/out_muonsXeLSLong_isotopes", "/dcache/xenon/kweerman/TEST/out_muonsXeLS50000_isotopes"]
+#figure_name = "AZhistogram_spectrum"
+job_range = [1,100]
+file_names = ["/dcache/xenon/kweerman/XeLS10^7/out_muonsXeLSLong_isotopes"]
+figure_name = "10^7muons_isotope_histogram"
+total_neutrons, tot_events, totAZ_count, Z_list, A_list = histogram(file_names, job_range, figure_name)
+
+
+def elements_list(elements_file):
+    # returns a list containing the names of the chemical elements
+    # the index corresponds to the Z value
+    
+    elementsFile = open(elements_file, encoding='utf-8')
+    elements = list(csv.reader(elementsFile))
+    elementsFile.close()
+
+    elements_list = []
+    for line in elements:
+        elements_list.append(line[1])
+
+    return elements_list
+
+
+def isotope_names(totAZ_count, elements_file):
+    # creates a list containing the names of the isotopes and sorting them 
+
+    sorted_isotopes = sorted(totAZ_count, key=itemgetter(1))
+    elements_names = elements_list(elements_file)
+    isotope_nameslist, isotope_numberlist = [], []
+    last_Z_value, first_count, last_count = 0, 0, 0
+
+    for isotope in sorted_isotopes:
+        A, Z, count = isotope
+
+        # every time we have a new element, we sort the A numbers
+        if last_Z_value != Z:
+            names = isotope_nameslist[first_count:last_count]
+            numbers = isotope_numberlist[first_count:last_count]
+            isotope_nameslist[first_count:last_count] = sorted(names, key=itemgetter(1))
+            isotope_numberlist[first_count:last_count] = sorted(numbers, key=itemgetter(1))
+            first_count = last_count
+
+        isotope_nameslist.append([elements_names[Z], A, count])
+        isotope_numberlist.append([Z, A, count])
+        last_count += 1
+        last_Z_value = Z
+
+        # at the last step the A numbers have to be sorted once again
+        if last_count == len(sorted_isotopes):
+            names = isotope_nameslist[first_count:last_count]
+            numbers = isotope_numberlist[first_count:last_count]
+            isotope_nameslist[first_count:last_count] = sorted(names, key=itemgetter(1))
+            isotope_numberlist[first_count:last_count] = sorted(numbers, key=itemgetter(1))
+
+    return isotope_numberlist, isotope_nameslist
+
+def print_isotopes():
+    elements_file = '/project/xenon/kweerman/exercises/PubChemElements_all.csv'
+    isotope_numberlist, isotope_nameslist = isotope_names(totAZ_count, elements_file)
+    print("For {0} events the isotope list created is {1}".format(tot_events, isotope_numberlist))
+    for line in isotope_numberlist:
+        A, Z, count = line
+        print(A, Z, count)
+
+    sorted_on_counts = sorted(isotope_nameslist, key=itemgetter(2))
+
+print_isotopes()
