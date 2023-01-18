@@ -86,16 +86,14 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
         error_file = log_folder + copy_file + '{0}error.log'.format(cycle)
 
         # the -d indicates where the log and error file will be dumped! 
-        qsub_call = 'qsub -d {0} %s -o {1} -e {2}'.format(log_folder, log_file, error_file) 
+        qsub_call = 'qsub -d {0} %s -o {1} -e {2} -l "mem=10gb"'.format(log_folder, log_file, error_file) 
         call(qsub_call % inp_script, shell=True)
 
         os.remove(inp_script)
       
-
 path = '/project/xenon/kweerman/exercises/MGDRAW/'
-out_folder = '/dcache/xenon/kweerman/XeLS50000/'
+out_folder = '/dcache/xenon/kweerman/XeLS10^7/'
 job_folder, log_folder = path + 'input_files/', out_folder + 'log_files_fluka/'
 files_folder = out_folder + 'extra_files_fluka'
-submit_flukaruns(path, 'muons_XeLS50000.inp', 'out_muonsXeLS50000', 
-                    job_folder, out_folder, log_folder, files_folder, 'SRCEFILE',10)
-
+submit_flukaruns(path, 'muons_XeLSLong.inp', 'out_muonsXeLSLong', 
+                    job_folder, out_folder, log_folder, files_folder, 'SRCEFILE', 100)
