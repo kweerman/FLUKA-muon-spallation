@@ -87,6 +87,6 @@ LOW-PWXS         1.0                        DECANE     XE-LS
 USERDUMP       200.0                 2.0     100.0                    SRCEFILE
 *
 RANDOMIZ         1.0    100.00
-START           50.0                                     
+START       100000.0                                     
 STOP
 
