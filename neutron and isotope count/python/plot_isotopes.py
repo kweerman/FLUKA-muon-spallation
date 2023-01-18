@@ -43,7 +43,6 @@ def isotope_list(file_names, job_range=[1,10]):
 
             for isotope_count in isotope_list:
                 A, Z, count = isotope_count
-
                 # create a list with the count per isotope
                 isotope = [A, Z]
                 if isotope not in totAZ:
@@ -67,7 +66,9 @@ def histogram(file_names, job_range=[1,10], figure_name="AZhistogram"):
 
     print("The number of neutrons is {0}".format(total_neutrons))
     #print("For {0} events the isotope list created is {1}".format(tot_events, totAZ_count))
-    plt.hist2d(Z_list, A_list, bins=[60,140], norm=mpl.colors.LogNorm(), cmin=1)
+    x_bins = (max(Z_list) - min(Z_list)) + 1
+    y_bins = (max(A_list) - min(A_list)) + 1
+    plt.hist2d(Z_list, A_list, bins=[x_bins, y_bins], norm=mpl.colors.LogNorm(), cmin=1)
     #plt.hist2d(Z_list, A_list, bins=[60,140], cmin=1)
     plt.xlim([0,60])
     plt.ylim([0,140])
@@ -142,7 +143,7 @@ def print_isotopes():
     elements_file = '/project/xenon/kweerman/exercises/PubChemElements_all.csv'
     isotope_numberlist, isotope_nameslist = isotope_names(totAZ_count, elements_file)
     print("For {0} events the isotope list created is {1}".format(tot_events, isotope_numberlist))
-    for line in isotope_numberlist:
+    for line in isotope_nameslist:
         A, Z, count = line
         print(A, Z, count)
 
