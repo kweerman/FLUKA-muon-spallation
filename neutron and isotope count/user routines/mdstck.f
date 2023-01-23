@@ -32,6 +32,8 @@
       INCLUDE '(FHEAVY)'
       INCLUDE '(GENSTK)'
       INCLUDE '(TRACKR)'
+* extra
+      INCLUDE '(FLKSTK)'
 *     |   First particle run is indicated by this
       CHARACTER*20 FILNAM
       LOGICAL LFCOPE
@@ -51,18 +53,27 @@
 *
       IF ( .NOT. LFCOPE ) THEN
          LFCOPE = .TRUE.
-         OPEN ( UNIT = IODRAW, FILE = 'NEUTRO', STATUS = 'NEW', FORM =
+         OPEN ( UNIT = 22, FILE = 'NEUTRO', STATUS = 'NEW', FORM =
      &          'FORMATTED' )
 * the header of the file is written only the first time
-         WRITE (IODRAW,*) 'Neutron dump from mdstck.f'
+         WRITE (22,*) 'Neutron dump from mdstck.f'
       END IF
 *
+*      WRITE(22,*) JTRACK, NPSECN, XTRACK(0), YTRACK(0), ZTRACK(0)
+*      DO 2001 I = 1, NPSECN
+*         WRITE (22,*) 'Secondaries', KPART(I), IFLAG, NPSECN,
+*     &                 XTRACK(0), YTRACK(0), ZTRACK(0)
+* 2001 CONTINUE
 *      check if a neutron is created, particle code 8
       DO 2000 I = 1, NPSECN
       IF ( KPART(I) .EQ. 8) THEN
-         WRITE (IODRAW,*) 'Neutron created', KPART(I), IFLAG, NPSECN
+         WRITE (22,*) 'Neutron created', KPART(I), IFLAG, 
+     &               ISPUSR (MKBMX2),
+     &               ( SNGL (XTRACK (J)),
+     &      SNGL (YTRACK (J)), SNGL (ZTRACK (J)), J = 0, NTRACK ) 
          count = count + 1
-         WRITE (IODRAW,*) count
+         WRITE (22,*) JTRACK
+         WRITE (22,*) count
       END IF
  2000 CONTINUE
 *
