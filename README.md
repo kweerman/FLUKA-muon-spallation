@@ -21,7 +21,8 @@ $FLUPRO/flutil/ldpmqmd -o mydraw_vers2 -m fluka mgdraw_vers2.o
 **Compile MGDRAW and MDSTCK:**\
 $FLUPRO/flutil/fff mgdraw_vers4_unform.f\
 $FLUPRO/flutil/fff mdstck.f\
-$FLUPRO/flutil/ldpmqmd -o mydraw4_unform -m fluka mgdraw_vers4_unform.o mdstck.o
+$FLUPRO/flutil/fff source_muons.f\
+$FLUPRO/flutil/ldpmqmd -o mydraw4_unform -m fluka mgdraw_vers4_unform.o mdstck.o source_muons.o
 
 **FLUKA should be called as follow:**\
 $FLUPRO/flutil/rfluka -e $FLUPRO/flutil/mydraw_vers2 -N0 -M1 muons_XeLS \
