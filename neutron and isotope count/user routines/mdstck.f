@@ -48,32 +48,30 @@
 *     << return message from first call >>
          WRITE (LUNERR,*) 'MDSTCK called for this FLUKA routine'
          count = 0
+         LLOUSE = 0
          LFIRST = .FALSE.
       ENDIF
 *
       IF ( .NOT. LFCOPE ) THEN
          LFCOPE = .TRUE.
          OPEN ( UNIT = 22, FILE = 'NEUTRO', STATUS = 'NEW', FORM =
-     &          'FORMATTED' )
+     &          'UNFORMATTED' )
 * the header of the file is written only the first time
-         WRITE (22,*) 'Neutron dump from mdstck.f'
+         WRITE (22) 'Version 1 2022 Kelly Weerman'
+         capcount = 0
       END IF
 *
-*      WRITE(22,*) JTRACK, NPSECN, XTRACK(0), YTRACK(0), ZTRACK(0)
-*      DO 2001 I = 1, NPSECN
-*         WRITE (22,*) 'Secondaries', KPART(I), IFLAG, NPSECN,
-*     &                 XTRACK(0), YTRACK(0), ZTRACK(0)
-* 2001 CONTINUE
 *      check if a neutron is created, particle code 8
       DO 2000 I = 1, NPSECN
-      IF ( KPART(I) .EQ. 8) THEN
-         WRITE (22,*) 'Neutron created', KPART(I), IFLAG, 
-     &               ISPUSR (MKBMX2),
-     &               ( SNGL (XTRACK (J)),
-     &      SNGL (YTRACK (J)), SNGL (ZTRACK (J)), J = 0, NTRACK ) 
-         count = count + 1
-         WRITE (22,*) JTRACK
-         WRITE (22,*) count
+      IF (KPART(I) .EQ. 7 .AND. IFLAG .EQ. 3) THEN
+          IF (ZTRACK(0) .GT. 100 .AND. ZTRACK(0) .LT. 350) THEN
+              capcount = capcount + 1
+          END IF
+* note TKI(I) is the energy of the gamma and ETRACK of the particle followed: 
+* in this case that would be the neutron
+         WRITE(22) capcount, TKI(I), ETRACK,
+     &               XTRACK(0), YTRACK(0), ZTRACK(0),
+     &               NPSECN, (KPART(J), J = 1, NPSECN)
       END IF
  2000 CONTINUE
 *
