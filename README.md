@@ -24,7 +24,7 @@ $FLUPRO/flutil/fff mdstck.f\
 $FLUPRO/flutil/fff source_muons.f\
 $FLUPRO/flutil/ldpmqmd -o mydraw4_unform -m fluka mgdraw_vers4_unform.o mdstck.o source_muons.o\
 
-**NOTE: with the new version of source_muons_test, it is important that the BEAMPOS is defined in the input file since the muon start position is derived from there (XBEAM, YBEAM, ZBEAM)**
+NOTE: with the new version of source_muons_test, it is important that the BEAMPOS is defined in the input file since the muon start position is derived from there (XBEAM, YBEAM, ZBEAM)
 
 **FLUKA should be called as follow:**\
 $FLUPRO/flutil/rfluka -e $FLUPRO/flutil/mydraw_vers2 -N0 -M1 muons_XeLS \
