@@ -58,18 +58,14 @@
      &          'UNFORMATTED' )
 * the header of the file is written only the first time
          WRITE (22) 'Version 1 2022 Kelly Weerman'
-         capcount = 0
       END IF
 *
 *      check if a neutron is created, particle code 8
       DO 2000 I = 1, NPSECN
       IF (KPART(I) .EQ. 7 .AND. IFLAG .EQ. 3) THEN
-          IF (ZTRACK(0) .GT. 100 .AND. ZTRACK(0) .LT. 350) THEN
-              capcount = capcount + 1
-          END IF
 * note TKI(I) is the energy of the gamma and ETRACK of the particle followed: 
 * in this case that would be the neutron
-         WRITE(22) capcount, TKI(I), ETRACK,
+         WRITE(22) TKI(I), ETRACK,
      &               XTRACK(0), YTRACK(0), ZTRACK(0),
      &               NPSECN, (KPART(J), J = 1, NPSECN)
       END IF
