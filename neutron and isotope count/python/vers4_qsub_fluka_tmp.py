@@ -58,6 +58,7 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
         event_file = '{0}_importantbatch{1}'.format(copy_file,cycle)
         AZ_file = '{0}_isotopes{1}'.format(copy_file,cycle)
         neutron_file = '{0}{1}001_NEUTRO'.format(copy_file,cycle)
+        resid_file = '{0}{1}001_RESIDNUC'.format(copy_file,cycle)
         python_filepath = '/project/xenon/kweerman/exercises/'
 
         # create scripts where fluka is called
@@ -71,7 +72,7 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
         script2 = 'python {0}vers4_eventscreator.py {1} {2} {3}'.format(python_filepath, userdump_file, event_file, AZ_file)
 
         # we move all necesarry output to the dcache folder
-        script3 = 'mv {0} {1} {2} {3} {4}'.format(userdump_file, event_file, neutron_file, AZ_file, out_folder)
+        script3 = 'mv {0} {1} {2} {3} {4} {5}'.format(userdump_file, event_file, neutron_file, AZ_file, resid_file, out_folder)
         script4 = 'mv {0}{1}001.err {0}{1}001.log {0}{1}001.out \
                         ran{0}{1}001 ran{0}{1}002 {2} {3}'.format(copy_file,cycle,new_inp,files_folder)
         script_file_content = script_template.format(inp_file=inp_file, path=job_folder, 
@@ -90,10 +91,14 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
         call(qsub_call % inp_script, shell=True)
 
         os.remove(inp_script)
-      
+
+
 path = '/project/xenon/kweerman/exercises/MGDRAW/'
-out_folder = '/dcache/xenon/kweerman/XeLS10^7/'
-job_folder, log_folder = path + 'input_files/', out_folder + 'log_files_fluka/'
+out_folder = '/dcache/xenon/kweerman/NewSourceFile17feb/'
+job_folder, log_folder = out_folder + 'input_files/', out_folder + 'log_files_fluka/'
 files_folder = out_folder + 'extra_files_fluka'
 submit_flukaruns(path, 'muons_XeLSLong.inp', 'out_muonsXeLSLong', 
-                    job_folder, out_folder, log_folder, files_folder, 'SRCEFILE', 100)
+                    job_folder, out_folder, log_folder, files_folder, 'SRCEFILE', 150)
+
+# Note: source_muons_test.o is now complied in mydraw4_unform NOTE IN BEAMPOS NEED TO ADD -50 OR ELSE IT DOESNT WORK!!!!
+# also usrrnc.o has to be included since this is not written to github yet
