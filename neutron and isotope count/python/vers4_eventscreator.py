@@ -55,6 +55,7 @@ def events_creator(filename, event_filename, isotope_filename):
 
         # note: a list in a list is return, hence the [0]
         new_gen, x0, y0, z0, x1, y1, z1 = data[0]
+        
 
         # for every event we create coordinate lists and plot in seperate figures
         # plot the event and empty all lists to follow the track of a new muon
@@ -107,7 +108,8 @@ def events_creator(filename, event_filename, isotope_filename):
         z_list[no_tracks].extend((z0,z1))
 
         # in the case we encounter an unkown resid AZ, safe the data
-        if new_gen < -6 or new_gen == -2:
+        # not the whole cylinder is counted
+        if (z0 > 1000 and z0 < 3500) and (new_gen < -6 or new_gen == -2):
             lines = file1.read(8)
             data = np.fromfile(file1,dtype=np.int32,count=7)
             mass_num, charge = data[0], data[1]
@@ -153,5 +155,5 @@ def events_creator(filename, event_filename, isotope_filename):
 # python vers2_eventscreator.py filename event_filename
 file_name, event_filename, isotope_filename = sys.argv[1], sys.argv[2], sys.argv[3]
 events_creator(file_name, event_filename, isotope_filename)
-
+# python vers4_eventscreator.py muons_XeLS001_SRCEFILE importantfile isotopes
 
