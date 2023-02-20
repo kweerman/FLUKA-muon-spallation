@@ -7,7 +7,7 @@ DEFAULTS                                                              PRECISIO
 *
 * ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
 BEAM         -1.0e+5                                                  MUON+
-BEAMPOS          0.0       0.0   -2.0e+3       0.0       0.0
+BEAMPOS          0.0       0.0      -50.       0.0       0.0
 *
 * source used of source_muons to create distribution of muons at KamLAND
 OPEN            99.                                                   OLD
@@ -71,7 +71,7 @@ ASSIGNMA       XE-LS    TARGET
 * ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
 * Extra physics models that have to be turned on
 PHOTONUC         1.0                        DECANE     XE-LS    
-PHOTONUC         1.0                        DECANE     XE-LS          ELECTNUC   
+*PHOTONUC         1.0                        DECANE     XE-LS          ELECTNUC   
 PHYSICS          1.0                                                  COALESCE
 PHYSICS          2.0                                                  EM-DISSO
 PHYSICS          3.0                                                  EVAPORAT
@@ -83,6 +83,8 @@ PHYSICS       1000.0    1000.0    1000.0    1000.0    1000.0    1000.0PEATHRESH
 LOW-PWXS         1.0                        DECANE     XE-LS
 *
 * MGDRAW, EEDRAW and BXDRAW of mgdraw.f are called, output dumped in SRCEFILE
+RESNUCLEI         3.        0.       60.       28.       -1.        0.XELSDET
+USERWEIG          0.        0.        1.        0.        1.        0.   
 * ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
 USERDUMP       200.0                 2.0     100.0                    SRCEFILE
 *
