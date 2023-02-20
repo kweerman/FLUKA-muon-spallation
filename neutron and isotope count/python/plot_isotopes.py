@@ -7,6 +7,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from operator import itemgetter
 import csv
+import numpy as np
 
 def pickleLoader(pklFile):
     try:
@@ -14,6 +15,7 @@ def pickleLoader(pklFile):
             yield pickle.load(pklFile)
     except EOFError:
         pass
+
 
 def isotope_list(file_names, job_range=[1,10]):
     # create a list of isotopes that can be used for histogram plotting
@@ -58,13 +60,13 @@ def isotope_list(file_names, job_range=[1,10]):
     
     return total_neutrons, tot_events, totAZ_count, Z_list, A_list
 
-def histogram(file_names, job_range=[1,10], figure_name="AZhistogram"):
+def histogram(file_names, newfile, job_range=[1,10], figure_name="AZhistogram"):
     # creates a histogram of all isotopes and prints the information
     # file_names and job_range are lists 
 
     total_neutrons, tot_events, totAZ_count, Z_list, A_list = isotope_list(file_names, job_range)
-
     print("The number of neutrons is {0}".format(total_neutrons))
+    newfile.write("The number of neutrons is {0}\n".format(total_neutrons))
     #print("For {0} events the isotope list created is {1}".format(tot_events, totAZ_count))
     x_bins = (max(Z_list) - min(Z_list)) + 1
     y_bins = (max(A_list) - min(A_list)) + 1
@@ -79,16 +81,22 @@ def histogram(file_names, job_range=[1,10], figure_name="AZhistogram"):
 
     return total_neutrons, tot_events, totAZ_count, Z_list, A_list
 
-#job_range = [1,20]
-#file_names = ["/dcache/xenon/kweerman/XeLS100000/out_muonsXeLSLong_isotopes", "/dcache/xenon/kweerman/XeLS50000/out_muonsXeLS50000_isotopes"]
-#figure_name = "AZhistogram"
-#job_range = [1,20]
-#file_names = ["/dcache/xenon/kweerman/TEST10^5/out_muonsXeLSLong_isotopes", "/dcache/xenon/kweerman/TEST/out_muonsXeLS50000_isotopes"]
-#figure_name = "AZhistogram_spectrum"
+
 job_range = [1,100]
-file_names = ["/dcache/xenon/kweerman/XeLS10^7/out_muonsXeLSLong_isotopes"]
-figure_name = "10^7muons_isotope_histogram"
-total_neutrons, tot_events, totAZ_count, Z_list, A_list = histogram(file_names, job_range, figure_name)
+# --- with electnuc activated ---
+#file_names = ["/dcache/xenon/kweerman/XeLS10^7/out_muonsXeLSLong_isotopes"]
+#figure_name = "10^7muons_ELECTNUC_isotope_histogram"
+#newfile = open("10^7muons_ELECTNUC_isotope.txt","w")
+
+# --- no electnuc activated all down here ---
+#file_names = ["/dcache/xenon/kweerman/XeLS10^7NoELECTNUC/out_muonsXeLSLong_isotopes"]
+#figure_name = "10^7muons_isotope_histogram"
+#newfile = open("10^7muons_isotope.txt","w")
+# --- in addition RESNUCLEI activated ---
+file_names = ["/dcache/xenon/kweerman/XeLSISOTOPES10^7NOELECT/out_muonsXeLSLong_isotopes"]
+figure_name = "10^7muons_RESNUCLEI_isotope_histogram"
+newfile = open("10^7muons_RESNUCLEI_isotope.txt","w")
+total_neutrons, tot_events, totAZ_count, Z_list, A_list = histogram(file_names, newfile, job_range, figure_name)
 
 
 def elements_list(elements_file):
@@ -139,14 +147,40 @@ def isotope_names(totAZ_count, elements_file):
 
     return isotope_numberlist, isotope_nameslist
 
-def print_isotopes():
+def ktonday(eventcount):
+    sec24hr = 86400. 
+    muonrate = 0.198 # Hz
+    frequency = 1. / muonrate # every 5 sec one muon passes through
+    no_muons_simulated = 10**7 
+    time_muons = (no_muons_simulated * frequency) / sec24hr # 585 days of simulating, detector livetime
+
+    flukatracklength = 4000. #cm
+    meantracklength = 874. #cm
+    fluka_livetime = time_muons * (flukatracklength / meantracklength)
+
+    densityXeLS = 0.78013 #g/cm^3
+    XeLSvolume = 1150
+    XeLSmass = densityXeLS * XeLSvolume * 10**(-3) # to get kton
+    
+    ktonday = eventcount / (XeLSmass * fluka_livetime) # (kton day)^-1
+
+    return ktonday
+
+def print_isotopes(newfile):
     elements_file = '/project/xenon/kweerman/exercises/PubChemElements_all.csv'
     isotope_numberlist, isotope_nameslist = isotope_names(totAZ_count, elements_file)
+
     print("For {0} events the isotope list created is {1}".format(tot_events, isotope_numberlist))
-    for line in isotope_nameslist:
-        A, Z, count = line
-        print(A, Z, count)
+    newfile.write("{0}\n".format(isotope_numberlist))
+    newfile.write("For {0} events the isotope list created is\n".format(tot_events))
 
     sorted_on_counts = sorted(isotope_nameslist, key=itemgetter(2))
+    #for line in isotope_nameslist:
+    for line in isotope_numberlist:
+        A, Z, count = line
+        print(A, Z, count, "{:e}".format(ktonday(count)))
+        newfile.write("{0} {1} {2} {3:e}\n".format(A, Z, count, ktonday(count)))
 
-print_isotopes()
+print_isotopes(newfile)
+newfile.close()
+
