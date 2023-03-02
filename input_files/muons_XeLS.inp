@@ -13,7 +13,6 @@ BEAMPOS          0.0       0.0      -50.       0.0       0.0
 OPEN            99.                                                   OLD
 /project/xenon/kweerman/exercises/MuonFlux-KamLAND-Generate.dat
 SOURCE          99.
-*
 * Geometry in free format used: parallelepiped filled with iron (Fe)
 *
 GEOBEGIN                  0.01                                        COMBNAME
@@ -24,6 +23,7 @@ RPP BLK      -50000.0 50000.0 -50000.0 50000.0 -80000.0 80000.0
 RPP VOID     -10000.0 10000.0 -10000.0 10000.0 -20000.0 20000.0
 * The Xe-LS filled cylinder of 10m radius and 40m in the beam direction (z)
 RCC TARG     0.0 0.0 0.0 0.0 0.0 4000.0 1000.0
+*
 *
 END
 * -----
@@ -39,56 +39,57 @@ GEOEND
 * ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
 * Material and compound definitions of Xe doped Liquid Scintillator
 * ----------------
-MATERIAL                           0.733                              DECANE
-COMPOUND         10.    CARBON       22.  HYDROGEN                    DECANE
-MATERIAL                            0.88                              PSEUDO
-COMPOUND          9.    CARBON       12.  HYDROGEN                    PSEUDO
-MATERIAL                           1.904                              PPO
-COMPOUND         15.    CARBON       11.  HYDROGEN        1.  NITROGENPPO
-COMPOUND          1.    OXYGEN                                        PPO
-MATERIAL        54.0            2.221E-2                 0.0      136.136-XE
-MATERIAL        54.0             2.13E-3                 0.0      134.134-XE
-MATERIAL        54.0              4.0E-5                 0.0      132.132-XE
-* Enriched xenon gas by weight
-MATERIAL                         0.02437                              ENR-XE
-COMPOUND     -0.9111    136-XE   -0.0872    134-XE   -0.0017    132-XEENR-XE
-* LS contributions by volume
-MATERIAL                           0.756                              DECPSEU
-COMPOUND       -0.82   -DECANE     -0.18   -PSEUDO                    DECPSEU
-* PPO added by volume
-MATERIAL                         0.77736                              LS
-COMPOUND   -2.194E-3      -PPO   -0.9978  -DECPSEU                    LS
+MATERIAL        54.0       136   0.02221                              136-XE
+MATERIAL        54.0       134   0.00213                              134-XE
+MATERIAL        54.0       132   0.00004                              132-XE
+MATERIAL                         0.02437                              ENRXE
+COMPOUND     -0.9111    136-XE   -0.0872    134-XE  -0.0017   132-XE  ENRXE
+*
+MATERIAL                           0.875                              PSEUDO
+COMPOUND        12.0  HYDROGEN       9.0    CARBON                    PSEUDO
+*
+MATERIAL                           0.731                              DECANE
+COMPOUND        22.0  HYDROGEN      10.0    CARBON                    DECANE
+*
+MATERIAL                         0.00238                              PPO
+COMPOUND        11.0  HYDROGEN      15.0    CARBON                    PPO
+COMPOUND         1.0  NITROGEN       1.0    OXYGEN                    PPO
+* LS contributions normally by volume but calculated to weight
+MATERIAL                         0.76031                              LS
+COMPOUND     -0.7818    DECANE   -0.2152    PSEUDO    -0.003       PPOLS
 * Total Xe doped Liquid Scintillator by weight
-MATERIAL                         0.78013                              XE-LS
-COMPOUND     -0.0313    ENR-XE   -0.9687        LS                    XE-LS
+MATERIAL                         0.78013                              XELS
+COMPOUND    -0.9687         LS   -0.0313     ENRXE                    XELS
 * ----------------
 *
 * Assign materials: XE-LS for target, blackhole and vacuum
 *
 ASSIGNMA    BLCKHOLE   BLKBODY
 ASSIGNMA      VACUUM      VOID
-ASSIGNMA       XE-LS    TARGET
+ASSIGNMA        XELS    TARGET
 * ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
 * Extra physics models that have to be turned on
-PHOTONUC         1.0                        DECANE     XE-LS    
-*PHOTONUC         1.0                        DECANE     XE-LS          ELECTNUC   
+PHOTONUC         1.0                        PSEUDO      XELS     
 PHYSICS          1.0                                                  COALESCE
 PHYSICS          2.0                                                  EM-DISSO
 PHYSICS          3.0                                                  EVAPORAT
 IONTRANS        -2.0
+RADDECAY         0.0       0.0  
 * Newly added physics models
-PHYSICS                                                               DPMTHRES
+PHYSICS      20000.0        5.   0.125         2.0   10000.0     -1.0 DPMTHRES
 PHYSICS          1.0                                                  ISOMERS
+PHYSICS          1.0    0.005      0.15        2.0       2.0      2.0 IONSPLIT
+PHYSICS         -1.0       0.0    -1.0         0.0      -1.0      0.0 INFLDCAY
 PHYSICS       1000.0    1000.0    1000.0    1000.0    1000.0    1000.0PEATHRESH
-LOW-PWXS         1.0                        DECANE     XE-LS
+LOW-PWXS         1.0                        PSEUDO      XELS
 *
-* MGDRAW, EEDRAW and BXDRAW of mgdraw.f are called, output dumped in SRCEFILE
+* to activate residual nuclei scoring the following two lines are necessary
+USERWEIG          0.        0.        0.        0.        1.        0.   
 RESNUCLEI         3.        0.       60.       28.       -1.        0.XELSDET
-USERWEIG          0.        0.        1.        0.        1.        0.   
 * ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+* MGDRAW, EEDRAW and BXDRAW of mgdraw.f are called, output dumped in SRCEFILE
 USERDUMP       200.0                 2.0     100.0                    SRCEFILE
 *
 RANDOMIZ         1.0    100.00
 START       100000.0                                     
 STOP
-
