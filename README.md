@@ -1,10 +1,32 @@
 ## Directory structure
 <pre>
-<details><summary>data_analyses</summary>some info</details>
-<details><summary>input_files</summary></details>
-<details><summary>python_scripts</summary>
-<ol><details><summary>full_event_plotting</summary></details>
-<details><summary>isotope_tracking</summary></details></ol></details>
+<details><summary>data_analyses          # scripts used to read unformatted isotope and neutron files </summary>
+<ul>- mdstck_reader.py: reads the unformatted file created with mdstck.f
+- residnuc_reader.py: reads the unformatted file created with usrrnc.f
+- usdrawisotopes_reader: reads and sums all unformatted isotope files created with eventscreator_usdraw.py</ul></details>
+<details><summary>input_files            # fluka input files </summary>
+<ul>- muons_XeLS.inp: cylinder of 40m height filled with KamLAND-XeLS
+- muons_rock.inp: block of rock, 20 by 20 by 30 cm</ul></details>
+<details><summary>python_scripts         # scripts for submitting fluka runs and creating mgdraw output </summary>
+<ul>- eventscreator_usdraw.py: loops through mgdraw file and returns isotope spallation products: parents and daughters
+- qsub_fluka_usdraw.py: submitting fluka run and creating spallation isotope info with eventscreator</ul>
+<ol><details><summary>full_event_plotting    # tracks of all particle creation captured and plotted </summary>
+<ul>- eventscreator_event_plotting.py: loops through mgdraw file and returns all particle tracks of events with spallation isotope production
+- qsub_fluka_event_plotting.py: submitting fluka run and creating coordinate lists of events with spallation isotope production
+- plot_creator_event_plotting.py: creates plots of all events with heavy isotopes</ul></details>
+<details><summary>isotope_tracking       # tracks of all spallation isotopes are captured </summary>
+<ul>- eventscreator_isotope_tracking.py: loops through mgdraw file and returns all isotope tracks
+- qsub_fluka_isotope_tracking.py: submitting fluka run and creating spallation isotope track lists</ul></details>
+</ol></details>
+<details><summary>user_routines          # user routines for neutron and isotope count in fluka </summary>
+<ul>- mdstck.f: neutron capture count and energies
+- mgdraw_usdraw.f: entry usdraw called everytime an interaction takes place: events with isotope production returned
+- source_muons_kelly.f: $10^5$ muon energies distributed according to muon flux at KamLAND
+- usrrnc.f: istope production scored at the end of their paths</ul>
+<ol><details><summary>full_event_plotting      # tracks of all particles followed </summary>
+<ul>- mgdraw_event_plotting.f: mgdraw called at every step in the simulation and coordinates returned </ul></details>
+<details><summary>isotope_tracking         # tracks of all isotopes followed </summary>
+<ul>- mgdraw_isotope_tracking.f: mgdraw entry returns all track coordinates of heavy isotopes and neutrons </ul></details></ol></details>
 </pre>
 
 
