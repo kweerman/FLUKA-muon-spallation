@@ -29,22 +29,23 @@
 <ul>- mgdraw_isotope_tracking.f: mgdraw entry returns all track coordinates of heavy isotopes and neutrons </ul></details></ol></details>
 </pre>
 
+## FLUKA input
 
-<pre>
-|- Cylinder                          # fluka source for large LS cylinder 
-|- KamLAND                           # fluka source for KamLAND geometry
-|- macros                            # macros to calculate production yield
-|- script                            # environmental setup and util
-</pre>
-# FLUKA input
+Simulation of muon spallation in xenon doped liquid scintillator. The isotope production and tracks per event is returned with mgdraw.f in which the entries MGDRAW and USDRAW can be choosen. MGDRAW is called at every step in the simulation and thus returns the tracks of all particle production. USDRAW is called after each particle interaction, saving the coordinates of the interaction point and the type of interaction as ICODE. After USDRAW is called, the particle can be followed with MGDRAW. The user routine mgdraw.f is called to with the USERDUMP line in the input file. 
 
-Simulation of muon spallation in xenon doped liquid scintillator. The isotope production and number of neutrons per event is returned with MGDRAW. MDSTCK is also used to count the creation of neutrons and compare to the results of MGDRAW. Note that the USERDUMP line in the input file calls to MGDRAW, while MDSTCK is automatically called after every interaction. There are two folders containing different versions of MGDRAW: one where the tracks of all events are saved and plotted - "full event tracking" - and one where only the information on heavy elements and neutrons is saved - "neutron and isotope count".
+Another way to score the isotope production is with usrrnc.f. The user routine is called for stopping residual nuclei. Thus the coordinates that are returned correspond to the end of the isotope track. To call usrrnc.f the option USERWEIG and RESNUCLEI should be added to the input file.
 
-### Folder: full event tracking
+To score the neutron capture yield, mdstck.f is used which is called after a nuclear interaction takes place. The user routine is used to save the interaction point coordinates and daugther particles created for every neutron capture. In addition the total photon energy is saved. mdstck.f is called automatically after every interaction, thus it is not necessary to add something to the input file.
 
-The tracks of the events are reconstructed with MGDRAW and saved in an unformatted file called SRCEFILE. The python script eventscreator.py is used to loop through SRCEFILE and copy all events where an isotope heavier than helium is created into a new file. In addition the isotopes are counted for every created isotope the A and Z are printed together with the creation count onto the log file. The script qsub_fluka_tmp.py can be used to call to FLUKA multiple times and automatically let eventscreator.py go through the results. Lastly the events can be plotted with plot_creator.py and qsub_plot.py.
+## mgdraw.f versions
 
-### Folder: neutron and isotope count
+There are three version of mgdraw.f in this project: event_plotting, isotope_tracking and usdraw. Fistly, event_plotting: the entry MGDRAW is called for every point in the simulation and the coordinates are returned. Thus the SRCEFILE contains tracking information of all particles in the simulation. Secondly, isotope_tracking is similar to event_plotting, with the adjustment that only the tracks of heavy isotopes and neutrons are returned. Lastly, usdraw calls to the entry USDRAW and returns the parent and daughter information of all points where a heavy isotope is produced. Coordinates of the interation point and the type of interaction are scored as well.
+
+### Folder: full event plotting
+
+The tracks of the events are reconstructed with MGDRAW and saved in an unformatted file called SRCEFILE. The python script eventscreator.py is used to loop through SRCEFILE and copy all events where an isotope heavier than helium is created into a new file. In addition the isotopes are counted for every created isotope the A and Z are printed together with the creation count onto the log file. The script qsub_fluka.py can be used to call to FLUKA multiple times and automatically let eventscreator.py go through the results. Lastly the events can be plotted with plot_creator.py and qsub_plot.py.
+
+### Folder: isotope tracking
 
 MGDRAW is used to return a file where only the tracks of neutrons and isotopes heavier than helium are returned (see the if-statements of MGDRAW). Thereafter the script eventscreator.py can be used to count the number of isotopes and neutrons and print them onto the log file. Note that for the neutron count we check if it is not the same neutron as before by checking if the new track coordinates are not the same as before (this might also still need to be done for the isotopes). MDSTCK is used also to count the number of neutrons and returns more than with MGDRAW.
 
@@ -52,18 +53,22 @@ MGDRAW is used to return a file where only the tracks of neutrons and isotopes h
 
 The script ldpmqmd is used instead of lfluka in the second line, because the new version of FLUKA requires to link rQMD-2.4 by hand. If this is not done, the PHYSICS model COALESCE will result in an error. 
 
-**Compile MGDRAW:**\
-$FLUPRO/flutil/fff mgdraw_vers2.f\
-$FLUPRO/flutil/ldpmqmd -o mydraw_vers2 -m fluka mgdraw_vers2.o 
+**Load mgdraw:**\
+$FLUPRO/flutil/fff mgdraw_usdraw.f\
+$FLUPRO/flutil/fff mgdraw_isotope_tracking.f\
+$FLUPRO/flutil/fff mgdraw_event_plotting.f
 
-**Compile MGDRAW and MDSTCK:**\
-$FLUPRO/flutil/fff mgdraw_vers4_unform.f\
+**Load mdstck, usrrnc and muon flux file:**\
 $FLUPRO/flutil/fff mdstck.f\
-$FLUPRO/flutil/fff source_muons.f\
-$FLUPRO/flutil/ldpmqmd -o mydraw4_unform -m fluka mgdraw_vers4_unform.o mdstck.o source_muons.o\
+$FLUPRO/flutil/fff usrrnc.f\
+$FLUPRO/flutil/fff source_muons_kelly.f
 
-NOTE: with the new version of source_muons_test, it is important that the BEAMPOS is defined in the input file since the muon start position is derived from there (XBEAM, YBEAM, ZBEAM)
+**Compile different versions of user routines:**\
+Version = usdraw, isotope_tracking or event_plotting: depending on the requested output\
+$FLUPRO/flutil/ldpmqmd -o XeLS_version -m fluka mdstck.o usrrnc.o source_muons_kelly.o mgdraw_version.o
+
+NOTE: with the new version of source_muons_kelly, it is important that the BEAMPOS is defined in the input file since the muon start position is derived from there (XBEAM, YBEAM, ZBEAM)
 
 **FLUKA should be called as follow:**\
-$FLUPRO/flutil/rfluka -e $FLUPRO/flutil/mydraw_vers2 -N0 -M1 muons_XeLS \
-$FLUPRO/flutil/rfluka -e $FLUPRO/flutil/mydraw4_unform -N0 -M1 muons_XeLS 
+For version = usdraw, isotope_tracking, event_plotting\
+$FLUPRO/flutil/rfluka -e $FLUPRO/flutil/XeLS_version -N0 -M1 muons_XeLS
