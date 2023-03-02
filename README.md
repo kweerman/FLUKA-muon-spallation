@@ -33,7 +33,7 @@
 
 Simulation of muon spallation in xenon doped liquid scintillator. The isotope production and tracks per event is returned with mgdraw.f in which the entries MGDRAW and USDRAW can be choosen. MGDRAW is called at every step in the simulation and thus returns the tracks of all particle production. USDRAW is called after each particle interaction, saving the coordinates of the interaction point and the type of interaction as ICODE. After USDRAW is called, the particle can be followed with MGDRAW. The user routine mgdraw.f is called to with the USERDUMP line in the input file. 
 
-Another way to score the isotope production is with usrrnc.f. The user routine is called for stopping residual nuclei. Thus the coordinates that are returned correspond to the end of the isotope track. To call usrrnc.f the option USERWEIG and RESNUCLEI should be added to the input file.
+Another way to score the isotope production is with usrrnc.f. The user routine is called for stopping residual nuclei. Thus the coordinates that are returned correspond to the end of the isotope track: the last step of the nuclear reaction. To call usrrnc.f the option USERWEIG and RESNUCLEI should be added to the input file.
 
 To score the neutron capture yield, mdstck.f is used which is called after a nuclear interaction takes place. The user routine is used to save the interaction point coordinates and daugther particles created for every neutron capture. In addition the total photon energy is saved. mdstck.f is called automatically after every interaction, thus it is not necessary to add something to the input file.
 
