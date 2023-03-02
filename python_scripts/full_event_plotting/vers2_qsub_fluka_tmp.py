@@ -26,7 +26,7 @@ echo "------------------------------------------------------------------------"
 # out_folder = name and path of where to put the output: /dcache/xenon/kweerman/folder_name
 # copy_file = new name without the .inp, cycles = number of runs
 # fort_name = name of output file from USERDUMP
-def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_folder, fort_name='SRCEFILE', cycles=1):
+def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_folder, python_filepath, fort_name='SRCEFILE', cycles=1):
 
     # open the file where the random seed has to be changed 
     fin = open(path + inp_file,'r')
@@ -55,14 +55,13 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
         # filename for the events with elements heavier than helium
         userdump_file = '{0}{1}001_{2}'.format(copy_file,cycle,fort_name)
         event_file = '{0}_importantbatch{1}'.format(copy_file,cycle)
-        python_filepath = '/project/xenon/kweerman/exercises/'
 
         # create scripts where fluka is called
         inp_script = job_folder + copy_file + 'script%i.sh'%(cycle)
         fscript = open(inp_script, 'w')
 
         # note this should correspond to the mgdraw fluka name choosen!
-        script1 = '$FLUPRO/flutil/rfluka -e $FLUPRO/flutil/mydraw_vers2 -N0 -M1 ' + new_inp
+        script1 = '$FLUPRO/flutil/rfluka -e $FLUPRO/flutil/XeLSvers2 -N0 -M1 ' + new_inp
         script2 = 'python {0}vers2_eventscreator.py {1} {2}'.format(python_filepath, userdump_file, event_file)
 
         # we move all necesarry output to the dcache folder
@@ -81,7 +80,7 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
         error_file = log_folder + copy_file + '{0}error.log'.format(cycle)
 
         # the -d indicates where the log and error file will be dumped! 
-        qsub_call = 'qsub -d {0} %s -o {1} -e {2}'.format(log_folder, log_file, error_file) 
+        qsub_call = 'qsub -d {0} %s -o {1} -e {2} -l "mem=10gb'.format(log_folder, log_file, error_file) 
         call(qsub_call % inp_script, shell=True)
 
         os.remove(inp_script)
@@ -93,9 +92,10 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
 #submit_flukaruns(path, 'muons_rock.inp', 'out_rockmuons', 
 #                    job_folder, out_folder, log_folder,'SRCEFILE',8)
 
+python_filepath = '/project/xenon/kweerman/exercises/'
 path = '/project/xenon/kweerman/exercises/KamLAND-XeLS/large_cylinder/'
 out_folder = '/dcache/xenon/kweerman/XeLSLargeCylinder/'
 job_folder, log_folder = path + 'input_files/', out_folder + 'log_files_fluka/'
 submit_flukaruns(path, 'muons_XeLS.inp', 'out_muonsXeLS', 
-                    job_folder, out_folder, log_folder,'SRCEFILE',8)
+                    job_folder, out_folder, log_folder, python_filepath, 'SRCEFILE',8)
 

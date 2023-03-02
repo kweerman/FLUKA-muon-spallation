@@ -1,4 +1,6 @@
-* Version 2 2022 Kelly Weerman
+* Version 4 2022 Kelly Weerman
+* the complete paths of neutrons and heavy elements are returned
+* this file should be read with vers4_eventscreator.py
 *                                                                      *
 *=== mgdraw ===========================================================*
 *                                                                      *
@@ -80,17 +82,25 @@
          OPEN ( UNIT = IODRAW, FILE = FILNAM, STATUS = 'NEW', FORM =
      &          'UNFORMATTED' )
 * the header of the file is written only the first time
-         WRITE (IODRAW) 'Version 2 2022 Kelly Weerman'
+         WRITE (IODRAW) 'Version 4 2022 Kelly Weerman'
       END IF
+*      WRITE (IODRAW)  JTRACK, ( SNGL (XTRACK (I)),
+*     &      SNGL (YTRACK (I)), SNGL (ZTRACK (I)), I = 0, NTRACK )
+*  +-------------------------------------------------------------------*
+* check if a neutron has been created
+      IF ( JTRACK .EQ. 8) THEN
       WRITE (IODRAW)  JTRACK, ( SNGL (XTRACK (I)),
      &      SNGL (YTRACK (I)), SNGL (ZTRACK (I)), I = 0, NTRACK )
-*  +-------------------------------------------------------------------*
 * check if the particle code is -7 or lower, and then add the charge and mass
-      IF ( JTRACK .LE. -7) THEN
+      ELSE IF ( JTRACK .LE. -7) THEN
+      WRITE (IODRAW)  JTRACK, ( SNGL (XTRACK (I)),
+     &      SNGL (YTRACK (I)), SNGL (ZTRACK (I)), I = 0, NTRACK )
          WRITE (IODRAW) IBHEAV(ABS(JTRACK)), ICHEAV(ABS(JTRACK)), 
-     &                0., 0., 0., 0., 0.
+     &                0., 0., 0., 0., 0.     
 * check if the particle code is -2, heavyion, then add the charge and mass
       ELSE IF (JTRACK .EQ. -2) THEN
+      WRITE (IODRAW)  JTRACK, ( SNGL (XTRACK (I)),
+     &      SNGL (YTRACK (I)), SNGL (ZTRACK (I)), I = 0, NTRACK )
          WRITE(IODRAW) IBARCH(JTRACK), ICHRGE(JTRACK), 
      &                0., 0., 0., 0., 0.  
       END IF

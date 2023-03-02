@@ -29,7 +29,7 @@ echo "------------------------------------------------------------------------"
 # copy_file = new name without the .inp, cycles = number of runs
 # fort_name = name of output file from USERDUMP
 # files_folder = for all other files that might be important in the future
-def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_folder, files_folder, fort_name='SRCEFILE', cycles=1):
+def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_folder, files_folder, python_filepath, fort_name='SRCEFILE', cycles=1):
 
     # open the file where the random seed has to be changed 
     fin = open(path + inp_file,'r')
@@ -59,14 +59,13 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
         AZ_file = '{0}_isotopes{1}'.format(copy_file,cycle)
         neutron_file = '{0}{1}001_NEUTRO'.format(copy_file,cycle)
         resid_file = '{0}{1}001_RESIDNUC'.format(copy_file,cycle)
-        python_filepath = '/project/xenon/kweerman/exercises/'
 
         # create scripts where fluka is called
         inp_script = job_folder + copy_file + 'script%i.sh'%(cycle)
         fscript = open(inp_script, 'w')
 
         # note this should correspond to the mgdraw fluka name choosen!
-        script1 = '$FLUPRO/flutil/rfluka -e $FLUPRO/flutil/mydraw4_unform -N0 -M1 ' + new_inp
+        script1 = '$FLUPRO/flutil/rfluka -e $FLUPRO/flutil/XeLSvers4 -N0 -M1 ' + new_inp
 
         # from this line the no neutrons and elemnts created will be printed in the log file
         script2 = 'python {0}vers4_eventscreator.py {1} {2} {3}'.format(python_filepath, userdump_file, event_file, AZ_file)
@@ -93,12 +92,13 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
         os.remove(inp_script)
 
 
+python_filepath = '/project/xenon/kweerman/exercises/'
 path = '/project/xenon/kweerman/exercises/MGDRAW/'
 out_folder = '/dcache/xenon/kweerman/NewSourceFile17feb/'
 job_folder, log_folder = out_folder + 'input_files/', out_folder + 'log_files_fluka/'
 files_folder = out_folder + 'extra_files_fluka'
 submit_flukaruns(path, 'muons_XeLSLong.inp', 'out_muonsXeLSLong', 
-                    job_folder, out_folder, log_folder, files_folder, 'SRCEFILE', 150)
+                    job_folder, out_folder, log_folder, files_folder, python_filepath, 'SRCEFILE', 150)
 
 # Note: source_muons_test.o is now complied in mydraw4_unform NOTE IN BEAMPOS NEED TO ADD -50 OR ELSE IT DOESNT WORK!!!!
 # also usrrnc.o has to be included since this is not written to github yet

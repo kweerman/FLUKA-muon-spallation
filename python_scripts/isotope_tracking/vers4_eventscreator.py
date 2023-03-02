@@ -87,7 +87,7 @@ def events_creator(filename, event_filename, isotope_filename):
             no_tracks += 1
 
             # check if the neutron is not the same as before
-            if new_gen == 8 and last_neutron_coord != [x0,y0,z0]:
+            if new_gen == 8 and last_neutron_coord != [x0,y0,z0] and (z0 > 1000 and z0 < 3500):
                 neutron_count += 1
 
             first_time = True
