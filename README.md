@@ -1,3 +1,19 @@
+## Directory structure
+<pre>
+<details><summary>data_analyses</summary>some info</details>
+<details><summary>input_files</summary></details>
+<details><summary>python_scripts</summary>
+<ol><details><summary>full_event_plotting</summary></details>
+<details><summary>isotope_tracking</summary></details></ol></details>
+</pre>
+
+
+<pre>
+|- Cylinder                          # fluka source for large LS cylinder 
+|- KamLAND                           # fluka source for KamLAND geometry
+|- macros                            # macros to calculate production yield
+|- script                            # environmental setup and util
+</pre>
 # FLUKA input
 
 Simulation of muon spallation in xenon doped liquid scintillator. The isotope production and number of neutrons per event is returned with MGDRAW. MDSTCK is also used to count the creation of neutrons and compare to the results of MGDRAW. Note that the USERDUMP line in the input file calls to MGDRAW, while MDSTCK is automatically called after every interaction. There are two folders containing different versions of MGDRAW: one where the tracks of all events are saved and plotted - "full event tracking" - and one where only the information on heavy elements and neutrons is saved - "neutron and isotope count".
