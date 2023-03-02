@@ -68,10 +68,10 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
         fscript = open(inp_script, 'w')
 
         # note this should correspond to the mgdraw fluka name choosen!
-        script1 = '$FLUPRO/flutil/rfluka -e $FLUPRO/flutil/XeLSvers5 -N0 -M1 ' + new_inp
+        script1 = '$FLUPRO/flutil/rfluka -e $FLUPRO/flutil/XeLS_usdraw -N0 -M1 ' + new_inp
 
         # from this line the no neutrons and elemnts created will be printed in the log file
-        script2 = 'python {0}vers5_eventscreator.py {1} {2}'.format(python_filepath, userdump_file, AZ_file)
+        script2 = 'python {0}eventscreator_usdraw.py {1} {2}'.format(python_filepath, userdump_file, AZ_file)
 
         # in this case AZ_file contains the [AZ, particles, particle_count]
         # we move all necesarry output to the dcache folder

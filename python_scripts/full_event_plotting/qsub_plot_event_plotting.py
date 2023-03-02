@@ -27,8 +27,7 @@ echo "------------------------------------------------------------------------"
 # event_filename = the unformatted files with lists of coordinates and particle generations
 # out_folder = where the zipfile and figures are dumped\
 # cycles = should correspond to the fluka run cycles
-def submit_plots(path, event_filename, out_folder, log_folder, cycles=1):
-    python_filepath = '/project/xenon/kweerman/exercises/'
+def submit_plots(path, event_filename, out_folder, log_folder, python_filepath, cycles=1):
 
     for cycle in range(1, cycles + 1):
         event_file = path + event_filename + str(cycle)
@@ -49,7 +48,7 @@ def submit_plots(path, event_filename, out_folder, log_folder, cycles=1):
             inp_script = path + event_filename + 'script%i.sh'%(cycle)
             fscript = open(inp_script, 'w')
             zip_file = '{0}_zipfile{1}.zip'.format(event_filename,cycle)
-            script1 = 'python {0}vers2_plot_creator.py {1} {2} {3}'.format(python_filepath, event_file, zip_file, cycle)
+            script1 = 'python {0}plot_creator_event_plotting.py {1} {2} {3}'.format(python_filepath, event_file, zip_file, cycle)
 
             # move the zip files to the output folder and subsequently unzip there
             script2 = 'mv {0} {1}'.format(zip_file, out_folder)
@@ -77,8 +76,9 @@ def submit_plots(path, event_filename, out_folder, log_folder, cycles=1):
 #cycles = 8
 #submit_plots(path, event_filename, out_folder, log_folder, cycles)
 
+python_filepath = '/project/xenon/kweerman/exercises/'
 path = '/dcache/xenon/kweerman/XeLSLargeCylinder/'
 out_folder, log_folder = path + 'zip_files/', path + 'log_plots/'
 event_filename = 'out_muonsXeLS_importantbatch'
 cycles = 8
-submit_plots(path, event_filename, out_folder, log_folder, cycles)
+submit_plots(path, event_filename, out_folder, log_folder, python_filepath, cycles)
