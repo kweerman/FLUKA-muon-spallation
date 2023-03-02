@@ -37,6 +37,8 @@ Another way to score the isotope production is with usrrnc.f. The user routine i
 
 To score the neutron capture yield, mdstck.f is used which is called after a nuclear interaction takes place. The user routine is used to save the interaction point coordinates and daugther particles created for every neutron capture. In addition the total photon energy is saved. mdstck.f is called automatically after every interaction, thus it is not necessary to add something to the input file.
 
+Note source_muons_kelly.f is used to generate muon energies according to the spectrum at KamLAND. The muons are dumped at position (xbeam, ybeam, zbeam) which is defined by BEAMPOS in the input file. The muons are ejected in a straight line and move in the positive z-direction.
+
 ## mgdraw.f versions
 
 There are three version of mgdraw.f in this project: event_plotting, isotope_tracking and usdraw. Fistly, event_plotting: the entry MGDRAW is called for every point in the simulation and the coordinates are returned. Thus the SRCEFILE contains tracking information of all particles in the simulation. Secondly, isotope_tracking is similar to event_plotting, with the adjustment that only the tracks of heavy isotopes and neutrons are returned. Lastly, usdraw calls to the entry USDRAW and returns the parent and daughter information of all points where a heavy isotope is produced. Coordinates of the interation point and the type of interaction are scored as well.
