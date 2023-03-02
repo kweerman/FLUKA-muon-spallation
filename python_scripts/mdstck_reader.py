@@ -127,7 +127,7 @@ def print_neutroninfo(paths, filename, job_range=[1,1], neutron_filename="Neutro
     return 
 
 job_range = [1,150]
-paths = ['/dcache/xenon/kweerman/NewSourceFile17feb/']
+paths = ['/dcache/xenon/kweerman/NewFlukaVersion_allphysicsmodelson+/']
 filename = "out_muonsXeLSLong"
 neutron_filename = sys.argv[1]
 #neutron_filename="NeutronInfotot.txt"

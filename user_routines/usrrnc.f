@@ -1,5 +1,7 @@
 *$ CREATE USRRNC.FOR
-*COPY USRRNC
+* Version 1 Kelly Weerman
+* save residual nuclei information: Z A isomeric state and X,Y,Z coordinates
+* note: the nuclei is scored at the end of its path, so not when it is created
 *
 *=== Usrrnc ===========================================================*
 *
@@ -53,9 +55,9 @@
       END IF
 *
       IF (IZ .GE. 3) THEN
-         WRITE (21) IZ, IA, IS, ISPUSR (MKBMX2)
+         WRITE (21) IZ, IA, IS, XTRACK(0), YTRACK(0), ZTRACK(0)
       ELSE IF (IZ .EQ. 2 .AND. IA .GE. 5) THEN
-         WRITE (21) IZ, IA, IS, ISPUSR (MKBMX2)
+         WRITE (21) IZ, IA, IS, XTRACK(0), YTRACK(0), ZTRACK(0)
       ENDIF
 *
       RETURN

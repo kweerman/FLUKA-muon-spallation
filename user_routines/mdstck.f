@@ -1,5 +1,7 @@
 *$ CREATE MDSTCK.FOR
-*COPY MDSTCK
+* Version 1 Kelly Weerman
+* score the neutron capture count by looking at interactions where a gamma
+* is send out after a low-energy neutron interaction
 *
 *=== Mdstck ===========================================================*
 *
