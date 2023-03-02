@@ -3,7 +3,13 @@
 <details><summary>data_analyses          # scripts used to read unformatted isotope and neutron files </summary>
 <ul>- mdstck_reader.py: reads the unformatted file created with mdstck.f
 - residnuc_reader.py: reads the unformatted file created with usrrnc.f
-- usdrawisotopes_reader: reads and sums all unformatted isotope files created with eventscreator_usdraw.py</ul></details>
+- usdrawisotopes_reader.py: reads and sums all unformatted isotope files created with eventscreator_usdraw.py
+- createhistograms.ipynb: input txt files with isotope counts
+- kamlandcompare.ipynb: compare isotope counts with KamLAND FLUKA data
+- neutroncompare.ipynb: read formatted neutron count file (txt)
+- watercompareisotopes_beacom.ipynb: read formatted neutron count and compare to Beacom article
+- isotope_count_txt.ipynb: read formatted isotope count file (txt)
+- usdraw_createdaughterfile.ipynb: read unformatted total run file and convert to daughter and parent information txt file</ul></details>
 <details><summary>input_files            # fluka input files </summary>
 <ul>- muons_XeLS.inp: cylinder of 40m height filled with KamLAND-XeLS
 - muons_rock.inp: block of rock, 20 by 20 by 30 cm</ul></details>
