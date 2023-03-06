@@ -277,6 +277,19 @@
      &            NPHEAV, (IBHEAV(KHEAVY(L)),  
      &                     ICHEAV(KHEAVY(L)), L = 1, NPHEAV)
  2002 CONTINUE
+* ----
+* the residual nuclei are scored here
+* IBRES = A and ICRES = Z
+      IF (ICODE .EQ. 101 .OR. ICODE .EQ. 300) THEN
+         IF (IBRES .NE. 0 .AND. ICRES .GE. 2) THEN
+            WRITE (IODRAW) ICODE, 0, JTRACK,
+     &            XTRACK(0), YTRACK(0), ZTRACK(0),
+     &            IBRES, ICRES,
+     &            NP, (KPART(J), J = 1, NP), 
+     &            NPHEAV, (IBHEAV(KHEAVY(L)),  
+     &                     ICHEAV(KHEAVY(L)), L = 1, NPHEAV)
+         END IF
+      END IF
       RETURN
 *=== End of subrutine Mgdraw ==========================================*
       END
