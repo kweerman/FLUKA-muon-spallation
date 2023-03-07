@@ -1,7 +1,7 @@
 # Version 1 2023 Kelly Weerman 
 # from the "outfile_isotopes" file created with vers5_eventscreator.py the information is substracted
 # which is totAZ_count ([A,Z,count]), AZ_jtrack([A,Z],[jtrack],[count]), part_gen_count ([[A,Z],[particles_lists],[counts]])
-# and [particle_lists] = [ [jtrack, 6,10,[4,2]] , [...], ] where the last number inbetween brackets, i.e. [4,2], is the A Z of daugthers
+# and [particle_lists] = [ [jtrack, 6,10,[4,2]] , [...], ] where the last number inbetween brackets, i.e. [4,2], is the A Z of daughters
 # return totAZ_count, AZ_jtrack, interactions_list, no_muons in the form [A, Z, count], [[A,Z], [jtracks], [counts]]
 # [[A,Z], [particles lists], [counts]] where particle lists [jtrack, 6,10,[4,2]] , [...], ... and no_muons
 # the created lists (in unformatted "isotope_filename") can be printed with "usdraw_createdaughterfile.ipynb"
@@ -47,6 +47,7 @@ def isotope_list_count(path, file_name, isotope_filename, job_range=[1,2]):
     no_muons = 0
     totAZ, totAZ_count = [], []
     AZ_jtrack = []
+    hydrogen_capcount, carbon_capcount = 0, 0
             
     for job in range(job_range[0], job_range[1] + 1):
         try:
@@ -59,8 +60,10 @@ def isotope_list_count(path, file_name, isotope_filename, job_range=[1,2]):
 
         # return all the information from the files, and add them
         for event in pickleLoader(file):
-            isotope_list, part_gens, part_gen_count = event
+            isotope_list, part_gens, part_gen_count, hydrogen_capture, carbon_capture = event
         file.close()
+        hydrogen_capcount += hydrogen_capture
+        carbon_capcount += carbon_capture
 
         # the amount of isotopes created is the length of AZ list
         for i in range(len(isotope_list)):
@@ -102,9 +105,10 @@ def isotope_list_count(path, file_name, isotope_filename, job_range=[1,2]):
 
     # return the total lists in a file for easier plotting
     isotope_file = open(isotope_filename,'wb')
-    pickle.dump([totAZ_count, AZ_jtrack, interactions_list, no_muons], isotope_file)
+    pickle.dump([totAZ_count, AZ_jtrack, interactions_list, no_muons, hydrogen_capcount, carbon_capcount], isotope_file)
     print("The isotope list for {0} muons is given by {1}".format(no_muons, totAZ_count))
-    return totAZ_count, AZ_jtrack, interactions_list, no_muons
+    print("The number of hydrogen neutron capture is {0} and carbon neutron capture is {1}".format(hydrogen_capcount, carbon_capcount))
+    return totAZ_count, AZ_jtrack, interactions_list, no_muons, hydrogen_capcount, carbon_capcount
 
 
 path = "/dcache/xenon/kweerman/NewFlukaVersion/"
