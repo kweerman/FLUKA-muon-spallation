@@ -290,6 +290,19 @@
      &                     ICHEAV(KHEAVY(L)), L = 1, NPHEAV)
          END IF
       END IF
+* ----
+* Lastly we keep track of neutron hydrogen capture
+      DO 2003 I = 1, NP
+      IF (JTRACK .EQ. 8 .AND. KPART(I) .EQ. 7) THEN
+         IF (TKI(I) .GE. 2.220E-003 .AND. TKI(I) 
+     &                             .LE. 2.229E-003 ) THEN
+               NEUTRON_COUNT = NEUTRON_COUNT + 1
+               WRITE (IODRAW) 1, 1, NEUTRON_COUNT, 
+     &            XTRACK(0), YTRACK(0), ZTRACK(0), 
+     &                                     TKI(I)
+         END IF
+      END IF
+ 2003 CONTINUE
       RETURN
 *=== End of subrutine Mgdraw ==========================================*
       END
