@@ -2,7 +2,8 @@
 # reads SRCEFILE created with usdraw version 1 and saves the daughter particles
 # to a list of the form part_gens = [[A,Z], particles lists] where particle lists [jtrack, 6,10,[4,2]] , [...], ...
 # also returns count list corresponding to the particle lists in the form part_gen_count = [[A,Z], count] 
-# "isotope_filename" is filled with one line: totAZ_count, part_gens, part_gen_count
+# lastly counts the neutron capture on hydrogen, which is the line: 1, 1, count, X, Y, Z, E
+# "isotope_filename" is filled with one line: totAZ_count, part_gens, part_gen_count, hydrogen_capture, carbon_capture
 
 import numpy as np
 import sys
@@ -34,6 +35,7 @@ def events_creator(filename, isotope_filename):
     particle_list = []
     totAZ, totAZ_count = [], []
     part_gens, part_gen_count = [], []
+    neutron_energylist = []
 
     try:
         file = open(filename,'rb')
@@ -44,7 +46,7 @@ def events_creator(filename, isotope_filename):
     lines = file.read(4)
     header = np.fromfile(file,dtype='a28',count=1)[0]
     print(header.decode())
-    no_events = 0
+    no_events, hydrogen_capture, carbon_capture = 0, 0, 0
 
     while lines:
         lines = file.read(8)
@@ -56,7 +58,6 @@ def events_creator(filename, isotope_filename):
         
         icode, partcode, jtrack = data[0]
         particle_list = [jtrack]
-        new_isotope = True
 
         # a new event line is indicated with the following
         if icode == 0.:
@@ -64,6 +65,18 @@ def events_creator(filename, isotope_filename):
             continue
 
         x0, y0, z0 = np.fromfile(file,dtype=dataTypeCoord,count=1)[0]
+
+        # a neutron capture event is indicated and counted with the following
+        # the third variable - jtrack - is the hydrogen neutron count in this case
+        if icode == 1:
+            # not the whole cylinder is tested
+            if (z0 > 1000 and z0 < 3500):
+                hydrogen_capture = jtrack
+                capture_energy = np.fromfile(file,dtype=np.float64,count=1)[0]
+                neutron_energylist.append(capture_energy)
+            # the next line is read
+            continue
+
         A, Z, n_part = np.fromfile(file,dtype=dataTypeAZ,count=1)[0]
 
         # the number of KPART particles is indicated with np
@@ -82,6 +95,12 @@ def events_creator(filename, isotope_filename):
         # not the whole cylinder is tested
         if icode != 106 and (z0 > 1000 and z0 < 3500):
             isotope = [A, Z]
+            
+            # check if we have carbon capture by neutrons
+            if isotope == [13, 6] and jtrack == 8:
+                carbon_capture += 1
+            
+            # now we define the isotope counting lists
             in_list = False
             if isotope not in totAZ:
                 totAZ.append(isotope)
@@ -108,10 +127,12 @@ def events_creator(filename, isotope_filename):
         
     file.close()
     isotope_file = open(isotope_filename,'wb')
-    pickle.dump([totAZ_count, part_gens, part_gen_count], isotope_file)
+    pickle.dump([totAZ_count, part_gens, part_gen_count, hydrogen_capture, carbon_capture], isotope_file)
     isotope_file.close()
     print("The isotope list is given by {0}".format(totAZ_count))
+    print("The number of hydrogen neutron capture is {0} and carbon neutron capture is {1}".format(hydrogen_capture, carbon_capture))
     return
+
 
 file_name, isotope_filename = sys.argv[1], sys.argv[2]
 #file_name = "muons_XeLSLong001_SRCEFILE"
