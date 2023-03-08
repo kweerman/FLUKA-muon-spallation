@@ -69,11 +69,13 @@ def events_creator(filename, isotope_filename):
         # a neutron capture event is indicated and counted with the following
         # the third variable - jtrack - is the hydrogen neutron count in this case
         if icode == 1:
+            capture_energy = np.fromfile(file,dtype=np.float64,count=1)[0]
+            
             # not the whole cylinder is tested
             if (z0 > 1000 and z0 < 3500):
-                hydrogen_capture = jtrack
-                capture_energy = np.fromfile(file,dtype=np.float64,count=1)[0]
+                hydrogen_capture += 1
                 neutron_energylist.append(capture_energy)
+                
             # the next line is read
             continue
 
