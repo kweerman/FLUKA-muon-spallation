@@ -76,4 +76,4 @@ NOTE: with the new version of source_muons_kelly, it is important that the BEAMP
 
 **FLUKA should be called as follow:**\
 For version = usdraw, isotope_tracking, event_plotting\
-$FLUPRO/flutil/rfluka -e $FLUPRO/flutil/XeLS_version -N0 -M1 muons_XeLS\
+$FLUPRO/flutil/rfluka -e $FLUPRO/flutil/XeLS_version -N0 -M1 muons_XeLS
