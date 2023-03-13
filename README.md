@@ -38,9 +38,26 @@ Simulation of muon spallation in xenon doped liquid scintillator. The isotope pr
 
 Another way to score the isotope production is with usrrnc.f. The user routine is called for stopping residual nuclei. Thus the coordinates that are returned correspond to the end of the isotope track: the last step of the nuclear reaction. To call usrrnc.f the option USERWEIG and RESNUCLEI should be added to the input file.
 
-To score the neutron capture yield, mdstck.f is used which is called after a nuclear interaction takes place. The user routine is used to save the interaction point coordinates and daugther particles created for every neutron capture. In addition the total photon energy is saved. mdstck.f is called automatically after every interaction, thus it is not necessary to add something to the input file.
+To score the neutron capture yield, mdstck.f is used which is called after a nuclear interaction takes place. The user routine is used to save the interaction point coordinates and daugther particles created for every neutron capture. In addition the total photon energy is saved. mdstck.f is called automatically after every interaction, thus it is not necessary to add something to the input file. USDRAW can also be used to score the neutron capture yield, as is explained later in this file.
 
 Note source_muons_kelly.f is used to generate muon energies according to the spectrum at KamLAND. The muons are dumped at position (xbeam, ybeam, zbeam) which is defined by BEAMPOS in the input file. The muons are ejected in a straight line and move in the positive z-direction.
+
+### USDRAW routine in mgdraw.f
+
+To get the correct isotope yield with mgdraw.f - in agreement with the results of usrrnc.f - there are a couple of different parameters that have to be included to visualise the complete secondary production. Bear with me, this might seem unneccesary complicated, but when you include all paremeters your will get the desired results!
+
+The secondary production is visualised with three different arrays: KPART, KHEAVY and IBRES/ICRES. Note that heavy ions can be saved in COMMON GENSTK, RESNUC or FHEAVY. Subsequently it is of importance that these cards are included and used.
+* **The light secondaries**, which correspond to the particle codes in the fluka manual except for -7 to -12, are saved in COMMON GENSTK to the array KPART (printed with KPART[kp = 1 to NP]).
+
+* **The heavy ions** are saved in four different ways: 
+<ol>1) KPART(kp) = -2 which is indicated as heavy ion in the fluka manual. The Z and A of the nucleus can be printed respectively with ICHARGE(KPART(kp)) and IBARCH(KPART(kp)) from COMMON PAPROP.</ol>
+<ol>2) KPART(kp) < -12 in which case the ion information can be found in COMMON GENSTK. For the kpth secondary the code is given by KPART(kp) = -(kh + 100A + 100000Z + 1000000 m) with kh the kheavy(ip) index and m=99 indicating an excited state. To unpack the large KPART(kp) value: CALL USRDCI(KPART(I), IONA, IONZ, IONM) and subsequently IONA and IONZ return the isotope A and Z value.</ol>
+<ol>3) The heavy ions that correspond to JTRACK = -7 to -12 are saved to COMMON FHEAVY and can be visualised with the array KHEAVY (printed with KHEAVY[ip = 1 to NPHEAV]). Note that in this case KHEAVY(ip) = 7 to 12, thus the absolute value of JTRACK, and these particle codes don't show up in the KPART array. The Z and A of the nucleus can be printed respectively with ICHEAV(KHEAVY(ip)) and IBHEAV(KHEAVY(ip)). </ol>
+<ol>4) The residual nucleus information is saved in COMMON RESNUC and can be visualised with IBRES and ICRES (respectively A and Z of the nucleus). Note that the common has to be included by the user in mgdraw.f.</ol>
+
+However, there are conditions that have to be added to the above code to avoid incorrectly counting isotopes double. In the case of KART(kp) < -12, if the isotope is excited it will have a kh value of 7. The isotope is counted double (sometimes triple if m=99 since it will go to m=0 first) since it is printed as a large KPART(kp) number first and after de-excitation it is saved to COMMON FHEAVY, subsequently to be printed with KHEAVY. The overcounting can be avoided by excluding isotopes created with ICODE = 106 "de-excitation of secondaries in flight".  In addition, the residual nucleus information saved in RESNUC should only be returned when ICODE = 101 "inelastic scattering" or ICODE = 300 "low-energy neutron interactions" so that solely new isotope creation is taken into acount, and not for example elastic scattering interactinos.
+
+Lastly, the neutron capture on hydrogen and carbon is scored with USDRAW. The hydrogen capture yield is obtained by counting all secondary gammas with 2.22MeV energy and a neutron as parent. Note you could also look at ICODE = 300 instead of JTRACK = 8 since this former indicates an interaction with low-energy neutrons. Carbon capture is scored by counting interaction where 13-C is created through a neutron interaction. The yield will be the same as with mdstck.f. Note that in mdstck (n,2n) and (n,p) interactions are counted as well.
 
 ## mgdraw.f versions
 
