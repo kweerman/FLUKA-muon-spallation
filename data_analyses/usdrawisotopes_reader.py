@@ -4,7 +4,7 @@
 # and [particle_lists] = [ [jtrack, 6,10,[4,2]] , [...], ] where the last number inbetween brackets, i.e. [4,2], is the A Z of daughters
 # return totAZ_count, AZ_jtrack, interactions_list, no_muons in the form [A, Z, count], [[A,Z], [jtracks], [counts]]
 # [[A,Z], [particles lists], [counts]] where particle lists [jtrack, 6,10,[4,2]] , [...], ... and no_muons
-# additional hydrogen and carbon count returned, as well as a list of muon energies per isotope of the form [isotope, [muon_energy]]
+# additional hydrogen and carbon count returned, as well as a list of muon energies per isotope of the form [isotope, [muon_energy], [count]]
 # the created lists (in unformatted "isotope_filename") can be printed with "usdraw_createdaughterfile.ipynb"
 
 import pickle
@@ -75,12 +75,14 @@ def isotope_list_count(path, file_name, isotope_filename, job_range=[1,2]):
             interactions = part_gens[i][1:]
             jtracks = extract_first(interactions)
             count_interactions = part_gen_count[i][1:]
+
             muonE_list = isotope_muonE[i][1]
+            muonE_counts = isotope_muonE[i][2]
 
             if isotope not in totAZ:
                 totAZ.append(isotope)
                 totAZ_count.append([A, Z, count])
-                totAZ_muonE.append([isotope, muonE_list])
+                totAZ_muonE.append([isotope, muonE_list, muonE_counts])
 
                 # in the form[[A,Z],[particles_lists],[counts]]
                 interactions_list.append([isotope, interactions, count_interactions])
@@ -95,8 +97,13 @@ def isotope_list_count(path, file_name, isotope_filename, job_range=[1,2]):
             else:
                 ind = totAZ.index(isotope)
                 totAZ_count[ind][-1] += count 
+
+                for k in range(len(muonE_list)):
+                    muonE, countE = muonE_list[k], muonE_counts[k]
+                    totAZ_muonE = addinfo_tolists(muonE, countE, ind, totAZ_muonE)
+                    
                 # add the muon energies but remove dublicates
-                totAZ_muonE[ind][1] = list(set(totAZ_muonE[ind][1]).union(set(muonE_list)))
+                #totAZ_muonE[ind][1] = list(set(totAZ_muonE[ind][1]).union(set(muonE_list)))
 
                 # the particle creation and parent lists are updated
                 for j in range(len(interactions)):
@@ -117,10 +124,15 @@ def isotope_list_count(path, file_name, isotope_filename, job_range=[1,2]):
     return totAZ_count, AZ_jtrack, interactions_list, no_muons, hydrogen_capcount, carbon_capcount, totAZ_muonE
 
 
-path = "/dcache/xenon/kweerman/VeryLargeBatch12Mar/"
-file_name = "out_muonsXeLSLong_isotopes"
-job_range = [1,100]
+#path = "/dcache/xenon/kweerman/VeryLargeBatch12Mar/"
+#file_name = "out_muonsXeLSLong_isotopes"
+#job_range = [1,100]
 # the isotope file is a file that contains all the added counts from 150 tuns
-isotope_filename = sys.argv[1]
+#isotope_filename = sys.argv[1]
+path = "/project/xenon/kweerman/exercises/Python_scripts/"
+file_name = "important"
+job_range = [1,2]
+# the isotope file is a file that contains all the added counts from 150 tuns
+isotope_filename = "important_isotopes"
 isotope_list_count(path, file_name, isotope_filename, job_range)
 

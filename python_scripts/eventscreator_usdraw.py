@@ -3,7 +3,7 @@
 # to a list of the form part_gens = [[A,Z], particles lists] where particle lists [jtrack, 6,10,[4,2]] , [...], ...
 # also returns count list corresponding to the particle lists in the form part_gen_count = [[A,Z], count] 
 # in addition counts the neutron capture on hydrogen, which is the line: 1, 1, count, X, Y, Z, E
-# lastly the muon energy per created isotope is added to a list of the form [isotope, [muon_energy]]
+# lastly the muon energy per created isotope is added to a list of the form [isotope, [muon_energy], [count]]
 # "isotope_filename" is filled with one line: totAZ_count, part_gens, part_gen_count, hydrogen_capture, carbon_capture, totAZ_muonE
 
 import numpy as np
@@ -122,7 +122,7 @@ def events_creator(filename, isotope_filename):
             if isotope not in totAZ:
                 totAZ.append(isotope)
                 totAZ_count.append([A, Z, 1])
-                totAZ_muonE.append([isotope, [muon_energy]])
+                totAZ_muonE.append([isotope, [muon_energy],[1]])
 
                 part_gens.append([isotope, particle_list])
                 part_gen_count.append([isotope, 1])
@@ -130,11 +130,15 @@ def events_creator(filename, isotope_filename):
             else:
                 ind = totAZ.index(isotope)
                 totAZ_count[ind][-1] += 1
-
+                
                 # a list with all muon energies per isotope
-                muonElist = totAZ_muonE[ind][-1]
-                if muon_energy not in muonElist:
-                    muonElist.append(muon_energy)
+                muonElist = totAZ_muonE[ind]
+                if muon_energy not in muonElist[1]:
+                    muonElist[1].append(muon_energy)
+                    muonElist[2].append(1)
+                else:
+                    muon_ind = muonElist[1].index(muon_energy)
+                    muonElist[2][muon_ind] += 1
 
                 no_reactions = 0
                 for part_range in part_gens[ind][1:]:
@@ -158,7 +162,7 @@ def events_creator(filename, isotope_filename):
     return
 
 
-file_name, isotope_filename = sys.argv[1], sys.argv[2]
-#file_name = "muons_XeLS50001_SRCEFILE"
-#isotope_filename = "important1"
+#file_name, isotope_filename = sys.argv[1], sys.argv[2]
+file_name = "muons_XeLS50002_SRCEFILE"
+isotope_filename = "important2"
 events_creator(file_name, isotope_filename)
