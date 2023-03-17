@@ -2,7 +2,7 @@
 * construct the isotope creation the information is dumped in a file
 * which can be read with python vers5_eventscreator.py
 * only the creation coordinates of isotopes are returned: not the complete paths
-* usdraw is called
+* usdraw and sodraw are called: the last returns the initial muon energy
 *                                                                      *
 *=== mgdraw ===========================================================*
 *                                                                      *
@@ -88,6 +88,8 @@
      &          'UNFORMATTED' )
 * the header of the file is written only the first time
          WRITE (IODRAW) 'Version 5 2022 Kelly Weerman'
+* the energy of the first muon is dumped here
+         WRITE (IODRAW) TKEFLK(NPFLKA)
       END IF
 *      WRITE (IODRAW)  JTRACK, ( SNGL (XTRACK (I)),
 *     &      SNGL (YTRACK (I)), SNGL (ZTRACK (I)), I = 0, NTRACK )
@@ -133,7 +135,8 @@
 *                                                                      *
       ENTRY EEDRAW ( ICODE )
 * Create a line with 0 that can be used in the python script
-* to count the end of an event.
+* to count the end of an event
+* Note: input file USERDUMP to call this function use third option 4.0
       WRITE (IODRAW) 0, 0, 0
 *
       RETURN
@@ -196,11 +199,10 @@
 *                                                                      *
 *======================================================================*
 *
-* This function is not activated
+* This function is called every time a new muon is dumped
+* into the geometry, and return the kinetic energy
       ENTRY SODRAW
-*  |  Loop on main stack particle(s):
-      DO 2000 I = 1, NPFLKA
- 2000 CONTINUE
+         WRITE(IODRAW) TKEFLK(NPFLKA)
 *  |
       RETURN
 *

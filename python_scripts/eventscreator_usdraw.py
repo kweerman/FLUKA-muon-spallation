@@ -2,8 +2,9 @@
 # reads SRCEFILE created with usdraw version 1 and saves the daughter particles
 # to a list of the form part_gens = [[A,Z], particles lists] where particle lists [jtrack, 6,10,[4,2]] , [...], ...
 # also returns count list corresponding to the particle lists in the form part_gen_count = [[A,Z], count] 
-# lastly counts the neutron capture on hydrogen, which is the line: 1, 1, count, X, Y, Z, E
-# "isotope_filename" is filled with one line: totAZ_count, part_gens, part_gen_count, hydrogen_capture, carbon_capture
+# in addition counts the neutron capture on hydrogen, which is the line: 1, 1, count, X, Y, Z, E
+# lastly the muon energy per created isotope is added to a list of the form [isotope, [muon_energy]]
+# "isotope_filename" is filled with one line: totAZ_count, part_gens, part_gen_count, hydrogen_capture, carbon_capture, totAZ_muonE
 
 import numpy as np
 import sys
@@ -33,7 +34,7 @@ def events_creator(filename, isotope_filename):
     ])
 
     particle_list = []
-    totAZ, totAZ_count = [], []
+    totAZ, totAZ_count, totAZ_muonE = [], [], []
     part_gens, part_gen_count = [], []
     neutron_energylist = []
 
@@ -46,22 +47,36 @@ def events_creator(filename, isotope_filename):
     lines = file.read(4)
     header = np.fromfile(file,dtype='a28',count=1)[0]
     print(header.decode())
-    no_events, hydrogen_capture, carbon_capture = 0, 0, 0
+    hydrogen_capture, carbon_capture = 0, 0
+
+    # the first muon energy is read
+    lines = file.read(8)
+    muon_energy = np.fromfile(file,dtype=np.float64,count=1)[0]
+    # we choose to return rounded muon energies for convenience
+    muon_energy = int(round(muon_energy,0))
+    no_events = 1
 
     while lines:
         lines = file.read(8)
-
-        # the last line of the file is empty
         data = np.fromfile(file,dtype=dataTypeStart,count=1)
-        if len(data) == 0:
-            break
-        
         icode, partcode, jtrack = data[0]
         particle_list = [jtrack]
 
         # a new event line is indicated with the following
+        # the intial muon energy is returned here as well
         if icode == 0.:
             no_events += 1
+
+            # the next line contains the initial muon energy
+            lines = file.read(8)
+            muon_line = np.fromfile(file,dtype=np.float64,count=1)
+            
+            # the last line of the file is empty and indicates the end
+            if len(muon_line) == 0:
+                break
+                
+            muon_energy = muon_line[0]
+            muon_energy = int(round(muon_energy,0))
             continue
 
         x0, y0, z0 = np.fromfile(file,dtype=dataTypeCoord,count=1)[0]
@@ -107,6 +122,7 @@ def events_creator(filename, isotope_filename):
             if isotope not in totAZ:
                 totAZ.append(isotope)
                 totAZ_count.append([A, Z, 1])
+                totAZ_muonE.append([isotope, [muon_energy]])
 
                 part_gens.append([isotope, particle_list])
                 part_gen_count.append([isotope, 1])
@@ -114,6 +130,11 @@ def events_creator(filename, isotope_filename):
             else:
                 ind = totAZ.index(isotope)
                 totAZ_count[ind][-1] += 1
+
+                # a list with all muon energies per isotope
+                muonElist = totAZ_muonE[ind][-1]
+                if muon_energy not in muonElist:
+                    muonElist.append(muon_energy)
 
                 no_reactions = 0
                 for part_range in part_gens[ind][1:]:
@@ -129,14 +150,15 @@ def events_creator(filename, isotope_filename):
         
     file.close()
     isotope_file = open(isotope_filename,'wb')
-    pickle.dump([totAZ_count, part_gens, part_gen_count, hydrogen_capture, carbon_capture], isotope_file)
+    pickle.dump([totAZ_count, part_gens, part_gen_count, hydrogen_capture, carbon_capture, totAZ_muonE], isotope_file)
     isotope_file.close()
     print("The isotope list is given by {0}".format(totAZ_count))
     print("The number of hydrogen neutron capture is {0} and carbon neutron capture is {1}".format(hydrogen_capture, carbon_capture))
+    print("The muon energies per isotope is given by {0}".format(totAZ_muonE))
     return
 
 
 file_name, isotope_filename = sys.argv[1], sys.argv[2]
-#file_name = "muons_XeLSLong001_SRCEFILE"
-#isotope_filename = "important"
+#file_name = "muons_XeLS50001_SRCEFILE"
+#isotope_filename = "important1"
 events_creator(file_name, isotope_filename)
