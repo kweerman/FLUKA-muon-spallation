@@ -88,7 +88,8 @@ USERWEIG          0.        0.        0.        0.        1.        0.
 RESNUCLEI         3.        0.       60.       28.       -1.        0.XELSDET
 * ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
 * MGDRAW, EEDRAW and BXDRAW of mgdraw.f are called, output dumped in SRCEFILE
-USERDUMP       200.0                 2.0     100.0                    SRCEFILE
+* Also called to SODRAW for initial muon energy
+USERDUMP       200.0                 4.0     100.0                    SRCEFILE
 *
 RANDOMIZ         1.0    100.00
 START       100000.0                                     
