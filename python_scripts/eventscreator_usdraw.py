@@ -162,7 +162,7 @@ def events_creator(filename, isotope_filename):
     return
 
 
-#file_name, isotope_filename = sys.argv[1], sys.argv[2]
-file_name = "muons_XeLS50002_SRCEFILE"
-isotope_filename = "important2"
+file_name, isotope_filename = sys.argv[1], sys.argv[2]
+#file_name = "muons_XeLS50002_SRCEFILE"
+#isotope_filename = "important2"
 events_creator(file_name, isotope_filename)
