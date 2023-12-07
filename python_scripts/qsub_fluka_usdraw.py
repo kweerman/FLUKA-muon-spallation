@@ -1,4 +1,4 @@
-# version 5 2023 Kelly Weerman
+# version 6 2023 Kelly Weerman
 # submit fluka input file to stoomboot for a certain amount of jobs and returns unformatted files
 # SRCEFILE (isotope production and daughter information from usdraw), 
 # NEUTRO (neutron capture count from mdstck.f),
@@ -17,11 +17,13 @@ echo "Output saved to {out_folder}"
 echo "------------------------------------------------------------------------"
 cd $TMPDIR
 {script1}
+echo "Python job started on" `date`
 {script2}
+echo "Python job ended on" `date`
 {script3}
 {script4}
 echo "------------------------------------------------------------------------"
-echo "python vers5_eventscreator.py called for {userdump_file}"
+echo "python vers6_eventscreator.py called for {userdump_file}"
 echo "Job ended on" `date`
 echo "------------------------------------------------------------------------"
 """
@@ -32,7 +34,7 @@ echo "------------------------------------------------------------------------"
 # copy_file = new name without the .inp, cycles = number of runs
 # fort_name = name of output file from USERDUMP
 # files_folder = for all other files that might be important in the future
-def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_folder, files_folder, python_filepath, fort_name='SRCEFILE', cycles=1):
+def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_folder, files_folder, fort_name='SRCEFILE', cycles=1):
 
     # open the file where the random seed has to be changed 
     fin = open(path + inp_file,'r')
@@ -45,7 +47,7 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
             os.makedirs(folder)
 
     # create new files where the number of random seeds is differently
-    for cycle in range(76, cycles + 1):
+    for cycle in range(1, cycles + 1):
         filedata_out = filedate_in.replace("100.00","2%i."%(cycle))
 
         # create the dublicate files with different numbers and add new lines
@@ -62,13 +64,14 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
         AZ_file = '{0}_isotopes{1}'.format(copy_file,cycle)
         neutron_file = '{0}{1}001_NEUTRO'.format(copy_file,cycle)
         resid_file = '{0}{1}001_RESIDNUC'.format(copy_file,cycle)
+        python_filepath = '/project/xenon/kweerman/exercises/Python_scripts/'
 
         # create scripts where fluka is called
         inp_script = job_folder + copy_file + 'script%i.sh'%(cycle)
         fscript = open(inp_script, 'w')
 
         # note this should correspond to the mgdraw fluka name choosen!
-        script1 = '$FLUPRO/flutil/rfluka -e $FLUPRO/flutil/XeLS_usdraw -N0 -M1 ' + new_inp
+        script1 = '$FLUPRO/flutil/rfluka -e $FLUPRO/flutil/XeLSvers6 -N0 -M1 ' + new_inp
 
         # from this line the no neutrons and elemnts created will be printed in the log file
         script2 = 'python {0}eventscreator_usdraw.py {1} {2}'.format(python_filepath, userdump_file, AZ_file)
@@ -90,15 +93,17 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
         error_file = log_folder + copy_file + '{0}error.log'.format(cycle)
 
         # the -d indicates where the log and error file will be dumped! 
-        qsub_call = 'qsub -d {0} %s -o {1} -e {2} -l "mem=10gb"'.format(log_folder, log_file, error_file) 
+        qsub_call = 'qsub -d {0} %s -o {1} -e {2} -l "mem=10gb" -q generic7'.format(log_folder, log_file, error_file) 
+        #qsub_call = 'qsub -d {0} %s -o {1} -e {2} -l "walltime=96:00:00,mem=10gb" -q long7'.format(log_folder, log_file, error_file) 
         call(qsub_call % inp_script, shell=True)
 
         os.remove(inp_script)
 
-python_filepath = '/project/xenon/kweerman/exercises/Python_scripts/'
 path = '/project/xenon/kweerman/exercises/input-files/'
-out_folder = '/dcache/xenon/kweerman/NewFlukaVersion_allphysicsmodelson2+/'
+out_folder = '/dcache/xenon/kweerman/23AugMuonEDifftested3/'
 job_folder, log_folder = out_folder + 'input_files/', out_folder + 'log_files_fluka/'
 files_folder = out_folder + 'extra_files_fluka'
 submit_flukaruns(path, 'muons_XeLSLong.inp', 'out_muonsXeLSLong', 
-                    job_folder, out_folder, log_folder, files_folder, python_filepath, 'SRCEFILE', 150)
+                    job_folder, out_folder, log_folder, files_folder, 'SRCEFILE', 5)
+
+# Note: source_muons_kelly.o is now complied in XeLS_vers5 NOTE IN BEAMPOS NEED TO ADD -50 OR ELSE IT DOESNT WORK!!!!
