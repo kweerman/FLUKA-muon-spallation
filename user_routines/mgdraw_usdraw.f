@@ -1,9 +1,10 @@
-* Version 6 2022 Kelly Weerman: mgdraw routine where usdraw is used to 
+* Version 7 2022 Kelly Weerman: mgdraw routine where usdraw is used to 
 * construct the isotope creation the information is dumped in a file
 * which can be read with python vers6_eventscreator.py
 * only the creation coordinates of isotopes are returned: not the complete paths
 * usdraw and sodraw are called: the last returns the initial muon energy
 * also the muon energy difference is saved
+* isomeric state have been added, after A Z information of heavy particles
 *                                                                      *
 *=== mgdraw ===========================================================*
 *                                                                      *
@@ -269,6 +270,8 @@
          WRITE(IODRAW) ICODE, KPART(I), JTRACK,
      &            XTRACK(0), YTRACK(0), ZTRACK(0),
      &            IBARCH(KPART(I)), ICHRGE(KPART(I)), 
+* possible excited state index + 10000 if < 99 isomeric state index
+     &            ILVSEC(I), 
      &            NP, (KPART(J), J = 1, NP), 
      &            NPHEAV, (IBHEAV(KHEAVY(L)),  
      &                     ICHEAV(KHEAVY(L)), L = 1, NPHEAV)
@@ -278,6 +281,8 @@
       WRITE (IODRAW) ICODE, KPART(I), JTRACK,
      &            XTRACK(0), YTRACK(0), ZTRACK(0),
      &            IONA, IONZ, 
+* m < 99 is the isomeric state index, m = 99 is an excited state
+     &            IONM, 
      &            NP, (KPART(J), J = 1, NP), 
      &            NPHEAV, (IBHEAV(KHEAVY(L)),  
      &                     ICHEAV(KHEAVY(L)), L = 1, NPHEAV)
@@ -291,6 +296,8 @@
       WRITE (IODRAW) ICODE, KHEAVY(I), JTRACK, 
      &            XTRACK(0), YTRACK(0), ZTRACK(0),
      &            IBHEAV(KHEAVY(I)), ICHEAV(KHEAVY(I)), 
+* isomeric state of the kp-type heavy particle
+     &            IMHEAV(KHEAVY(I)),
      &            NP, (KPART(J), J = 1, NP), 
      &            NPHEAV, (IBHEAV(KHEAVY(L)),  
      &                     ICHEAV(KHEAVY(L)), L = 1, NPHEAV)
@@ -303,6 +310,8 @@
             WRITE (IODRAW) ICODE, 0, JTRACK,
      &            XTRACK(0), YTRACK(0), ZTRACK(0),
      &            IBRES, ICRES,
+* residual nucleus isomeric state index
+     &            ISMRES, 
      &            NP, (KPART(J), J = 1, NP), 
      &            NPHEAV, (IBHEAV(KHEAVY(L)),  
      &                     ICHEAV(KHEAVY(L)), L = 1, NPHEAV)
