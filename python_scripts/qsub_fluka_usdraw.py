@@ -4,9 +4,11 @@
 # NEUTRO (neutron capture count from mdstck.f),
 # RESIDNUC (isotope production from usrrnc.f).
 # in addition eventscreator.py is called to add usdraw isotopes into "isotopes" file
+# correct ratio of muon+ and muon-
 
 from subprocess import call 
 import os
+import math
 
 script_template = """#!/bin/bash
 echo "------------------------------------------------------------------------"
@@ -28,6 +30,26 @@ echo "Job ended on" `date`
 echo "------------------------------------------------------------------------"
 """
 
+def create_correct_muonratio(cycles):
+
+    muon_min, muon_plus = cycles/2.3, cycles*(1.3/2.3)
+    # Get the fractional parts of the numbers
+    rounded_muon_min = math.floor(muon_min)
+    rounded_muon_plus = math.floor(muon_plus)
+
+    fractional_part1 = muon_min - rounded_muon_min
+    fractional_part2 = muon_plus - rounded_muon_plus
+
+    if fractional_part1 > fractional_part2:
+        rounded_muon_min = math.floor(muon_min) + 1
+    elif fractional_part1 < fractional_part2:
+        rounded_muon_plus = math.floor(muon_plus) + 1
+    else:
+        rounded_muon_min = math.floor(muon_min) + 1
+    
+    return rounded_muon_min, rounded_muon_plus
+
+
 # path = start and end with a slash
 # job_folder = where to dump the new input files and the output
 # out_folder = name and path of where to put the output: /dcache/xenon/kweerman/folder_name
@@ -41,6 +63,9 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
     filedate_in = fin.read()
     fin.close()
 
+    muon_min, muon_plus = create_correct_muonratio(cycles)
+    print(muon_min, muon_plus)
+
     # if the folder does not exist, we create one at the given path
     for folder in (job_folder, log_folder, out_folder, files_folder):
         if not os.path.exists(folder):
@@ -49,6 +74,10 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
     # create new files where the number of random seeds is differently
     for cycle in range(1, cycles + 1):
         filedata_out = filedate_in.replace("100.00","2%i."%(cycle))
+
+        # ensure that the correct ratio of muon+ and muon- has been made
+        if cycle > muon_plus:
+            filedata_out = filedata_out.replace("MUON+","MUON-")
 
         # create the dublicate files with different numbers and add new lines
         new_inp = job_folder + copy_file + '{0}.inp'.format(cycle)
@@ -99,11 +128,22 @@ def submit_flukaruns(path, inp_file, copy_file, job_folder, out_folder, log_fold
 
         os.remove(inp_script)
 
+"""
+path = '/project/xenon/kweerman/exercises/Short_batch/unformatted_muEDifference/Fluka2023/'
+out_folder = '/project/xenon/kweerman/exercises/Short_batch/unformatted_muEDifference/Fluka2023/results/'
+job_folder, log_folder = out_folder + 'input_files/', out_folder + 'log_files_fluka/'
+files_folder = out_folder + 'extra_files_fluka'
+submit_flukaruns(path, 'muons_XeLS50.inp', 'out_muonsXeLS50', 
+                    job_folder, out_folder, log_folder, files_folder, 'SRCEFILE', 10)
+
+"""
+
 path = '/project/xenon/kweerman/exercises/input-files/'
-out_folder = '/dcache/xenon/kweerman/23AugMuonEDifftested3/'
+out_folder = '/dcache/xenon/kweerman/18SepMuonEdiffMu+Mu-Fluka2023_2/'
 job_folder, log_folder = out_folder + 'input_files/', out_folder + 'log_files_fluka/'
 files_folder = out_folder + 'extra_files_fluka'
 submit_flukaruns(path, 'muons_XeLSLong.inp', 'out_muonsXeLSLong', 
-                    job_folder, out_folder, log_folder, files_folder, 'SRCEFILE', 5)
+                    job_folder, out_folder, log_folder, files_folder, 'SRCEFILE', 200)
 
 # Note: source_muons_kelly.o is now complied in XeLS_vers5 NOTE IN BEAMPOS NEED TO ADD -50 OR ELSE IT DOESNT WORK!!!!
+# Note: also check that MUON+ is written in the code and 100.00
