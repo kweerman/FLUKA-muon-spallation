@@ -1,8 +1,9 @@
-* Version 5 2022 Kelly Weerman: mgdraw routine where usdraw is used to 
+* Version 6 2022 Kelly Weerman: mgdraw routine where usdraw is used to 
 * construct the isotope creation the information is dumped in a file
-* which can be read with python vers5_eventscreator.py
+* which can be read with python vers6_eventscreator.py
 * only the creation coordinates of isotopes are returned: not the complete paths
 * usdraw and sodraw are called: the last returns the initial muon energy
+* also the muon energy difference is saved
 *                                                                      *
 *=== mgdraw ===========================================================*
 *                                                                      *
@@ -54,6 +55,10 @@
       LOGICAL LFCOPE
       SAVE LFCOPE
       DATA LFCOPE / .FALSE. /
+* initialize the first event with the following
+         LOGICAL EVENTI
+         SAVE EVENTI
+         DATA EVENTI /.TRUE./
 *
 *     |  First call initializations:
       LOGICAL LFIRST
@@ -87,9 +92,16 @@
          OPEN ( UNIT = IODRAW, FILE = FILNAM, STATUS = 'NEW', FORM =
      &          'UNFORMATTED' )
 * the header of the file is written only the first time
-         WRITE (IODRAW) 'Version 5 2022 Kelly Weerman'
-* the energy of the first muon is dumped here
-         WRITE (IODRAW) TKEFLK(NPFLKA)
+         WRITE (IODRAW) 'Version 6 2022 Kelly Weerman'
+* the total energy of the first muon is dumped here
+*         WRITE (IODRAW) TKEFLK(NPFLKA) + AM(NPFLKA)
+      END IF
+*      WRITE(IODRAW) JTRACK, ETRACK
+* first time the event is started we save the muon energy
+      IF ( EVENTI ) THEN
+         WRITE (IODRAW) ETRACK
+         MUONE = ETRACK
+         EVENTI = .FALSE.
       END IF
 *      WRITE (IODRAW)  JTRACK, ( SNGL (XTRACK (I)),
 *     &      SNGL (YTRACK (I)), SNGL (ZTRACK (I)), I = 0, NTRACK )
@@ -138,6 +150,10 @@
 * to count the end of an event
 * Note: input file USERDUMP to call this function use third option 4.0
       WRITE (IODRAW) 0, 0, 0
+* safe the last muon energy to calculate total muon energy loss
+* we are at the next event so EVENTI is true
+      WRITE (IODRAW) ETRACK, MUONE - ETRACK
+      EVENTI = .TRUE.
 *
       RETURN
 *
@@ -188,8 +204,8 @@
          OPEN ( UNIT = IODRAW, FILE = FILNAM, STATUS = 'NEW', FORM =
      &          'UNFORMATTED' )
       END IF
-      WRITE (IODRAW)  0, ICODE, JTRACK, SNGL (ETRACK), SNGL (WTRACK)
-      WRITE (IODRAW)  SNGL (XSCO), SNGL (YSCO), SNGL (ZSCO), SNGL (RULL)
+*      WRITE (IODRAW)  0, ICODE, JTRACK, SNGL (ETRACK), SNGL (WTRACK)
+*      WRITE (IODRAW)  SNGL (XSCO), SNGL (YSCO), SNGL (ZSCO), SNGL (RULL)
 *  +-------------------------------------------------------------------*
       RETURN
 *
@@ -200,9 +216,9 @@
 *======================================================================*
 *
 * This function is called every time a new muon is dumped
-* into the geometry, and return the kinetic energy
+* into the geometry, and return the total energy
       ENTRY SODRAW
-         WRITE(IODRAW) TKEFLK(NPFLKA)
+*         WRITE(IODRAW) TKEFLK(NPFLKA) + AM(NPFLKA)
 *  |
       RETURN
 *
