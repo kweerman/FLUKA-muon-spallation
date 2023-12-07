@@ -1,4 +1,4 @@
-# Version 1 2023 Kelly Weerman 
+# Version 2 2023 Kelly Weerman 
 # from the "outfile_isotopes" file created with vers5_eventscreator.py the information is substracted
 # which is totAZ_count ([A,Z,count]), AZ_jtrack([A,Z],[jtrack],[count]), part_gen_count ([[A,Z],[particles_lists],[counts]])
 # and [particle_lists] = [ [jtrack, 6,10,[4,2]] , [...], ] where the last number inbetween brackets, i.e. [4,2], is the A Z of daughters
@@ -49,6 +49,7 @@ def isotope_list_count(path, file_name, isotope_filename, job_range=[1,2]):
     totAZ, totAZ_count, totAZ_muonE = [], [], []
     AZ_jtrack = []
     hydrogen_capcount, carbon_capcount = 0, 0
+    tot_muondiff, tot_parentscount, tot_energyevents = [], [], []
             
     for job in range(job_range[0], job_range[1] + 1):
         try:
@@ -61,10 +62,18 @@ def isotope_list_count(path, file_name, isotope_filename, job_range=[1,2]):
 
         # return all the information from the files, and add them
         for event in pickleLoader(file):
-            isotope_list, part_gens, part_gen_count, hydrogen_capture, carbon_capture, isotope_muonE = event
+            isotope_list, part_gens, part_gen_count, hydrogen_capture, carbon_capture, \
+            isotope_muonE, muon_differences, parents_total, energy_list_total = event
+            #print(muon_differences) #[[[[A,Z], count, event_number],[...]], Ediff]]
+            #print(parents_total)  #[[[jtrack, count, event_number], [...]], Ediff]]
+            #print(energy_list_total) #[[Ediff, count, event_number, [...]]
+        
         file.close()
         hydrogen_capcount += hydrogen_capture
         carbon_capcount += carbon_capture
+        tot_muondiff.append(muon_differences)
+        tot_parentscount.append(parents_total)
+        tot_energyevents.append(energy_list_total)
 
         # the amount of isotopes created is the length of AZ list
         for i in range(len(isotope_list)):
@@ -117,22 +126,23 @@ def isotope_list_count(path, file_name, isotope_filename, job_range=[1,2]):
 
     # return the total lists in a file for easier plotting
     isotope_file = open(isotope_filename,'wb')
+   # isotope_file2 = open(isotope_filename2,'wb')
+    # NOTE: we dont return tot energy list anymore since it is not necessary
     pickle.dump([totAZ_count, AZ_jtrack, interactions_list, no_muons, hydrogen_capcount, carbon_capcount, totAZ_muonE], isotope_file)
+   # pickle.dump([hydrogen_capcount, carbon_capcount, totAZ_muonE, tot_muondiff, tot_parentscount], isotope_file2)
     print("The isotope list for {0} muons is given by {1}".format(no_muons, totAZ_count))
     print("The number of hydrogen neutron capture is {0} and carbon neutron capture is {1}".format(hydrogen_capcount, carbon_capcount))
     print("The muon energies per isotope is given by {0}".format(totAZ_muonE))
-    return totAZ_count, AZ_jtrack, interactions_list, no_muons, hydrogen_capcount, carbon_capcount, totAZ_muonE
+    isotope_file.close()
+   # isotope_file2.close()
+    return totAZ_count, AZ_jtrack, interactions_list, no_muons, hydrogen_capcount, carbon_capcount, totAZ_muonE, tot_muondiff, tot_parentscount
 
 
-#path = "/dcache/xenon/kweerman/VeryLargeBatch12Mar/"
-#file_name = "out_muonsXeLSLong_isotopes"
-#job_range = [1,100]
+path = "/dcache/xenon/kweerman/18SepMuonEdiffMu+Mu-Fluka2023_2/"
+file_name = "out_muonsXeLSLong_isotopes"
+job_range = [1,200]
 # the isotope file is a file that contains all the added counts from 150 tuns
-#isotope_filename = sys.argv[1]
-path = "/project/xenon/kweerman/exercises/Python_scripts/"
-file_name = "important"
-job_range = [1,2]
-# the isotope file is a file that contains all the added counts from 150 tuns
-isotope_filename = "important_isotopes"
+isotope_filename = sys.argv[1]
+
 isotope_list_count(path, file_name, isotope_filename, job_range)
 
