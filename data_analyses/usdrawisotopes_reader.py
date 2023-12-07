@@ -1,4 +1,4 @@
-# Version 2 2023 Kelly Weerman 
+# Version 3 2023 Kelly Weerman 
 # from the "outfile_isotopes" file created with vers5_eventscreator.py the information is substracted
 # which is totAZ_count ([A,Z,count]), AZ_jtrack([A,Z],[jtrack],[count]), part_gen_count ([[A,Z],[particles_lists],[counts]])
 # and [particle_lists] = [ [jtrack, 6,10,[4,2]] , [...], ] where the last number inbetween brackets, i.e. [4,2], is the A Z of daughters
@@ -6,6 +6,7 @@
 # [[A,Z], [particles lists], [counts]] where particle lists [jtrack, 6,10,[4,2]] , [...], ... and no_muons
 # additional hydrogen and carbon count returned, as well as a list of muon energies per isotope of the form [isotope, [muon_energy], [count]]
 # the created lists (in unformatted "isotope_filename") can be printed with "usdraw_createdaughterfile.ipynb"
+# add the isomeric information
 
 import pickle
 from operator import itemgetter
@@ -21,11 +22,9 @@ def pickleLoader(pklFile):
     except EOFError:
         pass
 
-
 def extract_first(lijst):
     # returns the first value of each sublist in a list of lists
     return list(map(itemgetter(0), lijst))
-
 
 def addinfo_tolists(variable, count, list_ind, return_list):
     # return list of the form [[..], [variables], [counts]]
@@ -43,7 +42,6 @@ def addinfo_tolists(variable, count, list_ind, return_list):
 
 def isotope_list_count(path, file_name, isotope_filename, job_range=[1,2]):
 
-    #AZ_jtrack = []
     interactions_list = []
     no_muons = 0
     totAZ, totAZ_count, totAZ_muonE = [], [], []
@@ -64,9 +62,6 @@ def isotope_list_count(path, file_name, isotope_filename, job_range=[1,2]):
         for event in pickleLoader(file):
             isotope_list, part_gens, part_gen_count, hydrogen_capture, carbon_capture, \
             isotope_muonE, muon_differences, parents_total, energy_list_total = event
-            #print(muon_differences) #[[[[A,Z], count, event_number],[...]], Ediff]]
-            #print(parents_total)  #[[[jtrack, count, event_number], [...]], Ediff]]
-            #print(energy_list_total) #[[Ediff, count, event_number, [...]]
         
         file.close()
         hydrogen_capcount += hydrogen_capture
@@ -77,10 +72,10 @@ def isotope_list_count(path, file_name, isotope_filename, job_range=[1,2]):
 
         # the amount of isotopes created is the length of AZ list
         for i in range(len(isotope_list)):
-            A, Z, count = isotope_list[i]
+            A, Z, IS, count = isotope_list[i]
             
             # create a list with the count per isotope
-            isotope = [A, Z]
+            isotope = [A, Z, IS]
             interactions = part_gens[i][1:]
             jtracks = extract_first(interactions)
             count_interactions = part_gen_count[i][1:]
@@ -90,7 +85,7 @@ def isotope_list_count(path, file_name, isotope_filename, job_range=[1,2]):
 
             if isotope not in totAZ:
                 totAZ.append(isotope)
-                totAZ_count.append([A, Z, count])
+                totAZ_count.append([A, Z, IS, count])
                 totAZ_muonE.append([isotope, muonE_list, muonE_counts])
 
                 # in the form[[A,Z],[particles_lists],[counts]]
@@ -111,9 +106,6 @@ def isotope_list_count(path, file_name, isotope_filename, job_range=[1,2]):
                     muonE, countE = muonE_list[k], muonE_counts[k]
                     totAZ_muonE = addinfo_tolists(muonE, countE, ind, totAZ_muonE)
                     
-                # add the muon energies but remove dublicates
-                #totAZ_muonE[ind][1] = list(set(totAZ_muonE[ind][1]).union(set(muonE_list)))
-
                 # the particle creation and parent lists are updated
                 for j in range(len(interactions)):
                     interaction, count_interaction = interactions[j], count_interactions[j]
@@ -126,17 +118,14 @@ def isotope_list_count(path, file_name, isotope_filename, job_range=[1,2]):
 
     # return the total lists in a file for easier plotting
     isotope_file = open(isotope_filename,'wb')
-   # isotope_file2 = open(isotope_filename2,'wb')
-    # NOTE: we dont return tot energy list anymore since it is not necessary
     pickle.dump([totAZ_count, AZ_jtrack, interactions_list, no_muons, hydrogen_capcount, carbon_capcount, totAZ_muonE], isotope_file)
    # pickle.dump([hydrogen_capcount, carbon_capcount, totAZ_muonE, tot_muondiff, tot_parentscount], isotope_file2)
     print("The isotope list for {0} muons is given by {1}".format(no_muons, totAZ_count))
     print("The number of hydrogen neutron capture is {0} and carbon neutron capture is {1}".format(hydrogen_capcount, carbon_capcount))
     print("The muon energies per isotope is given by {0}".format(totAZ_muonE))
     isotope_file.close()
-   # isotope_file2.close()
+    
     return totAZ_count, AZ_jtrack, interactions_list, no_muons, hydrogen_capcount, carbon_capcount, totAZ_muonE, tot_muondiff, tot_parentscount
-
 
 path = "/dcache/xenon/kweerman/18SepMuonEdiffMu+Mu-Fluka2023_2/"
 file_name = "out_muonsXeLSLong_isotopes"

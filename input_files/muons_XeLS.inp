@@ -92,5 +92,6 @@ RESNUCLEI         3.        0.       60.       28.       -1.        0.XELSDET
 USERDUMP       200.0                 4.0     100.0                    SRCEFILE
 *
 RANDOMIZ         1.0    100.00
-START       100000.0                                     
+*START       100000.0       
+START       100000.0                                
 STOP

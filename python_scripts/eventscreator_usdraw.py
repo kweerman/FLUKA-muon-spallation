@@ -1,10 +1,11 @@
-# Version 6 2023 Kelly Weerman
+# Version 7 2023 Kelly Weerman
 # reads SRCEFILE created with usdraw version 1 and saves the daughter particles
 # to a list of the form part_gens = [[A,Z], particles lists] where particle lists [jtrack, 6,10,[4,2]] , [...], ...
 # also returns count list corresponding to the particle lists in the form part_gen_count = [[A,Z], count] 
 # in addition counts the neutron capture on hydrogen, which is the line: 1, 1, count, X, Y, Z, E
 # lastly the muon energy per created isotope is added to a list of the form [isotope, [muon_energy], [count]]
 # "isotope_filename" is filled with one line: totAZ_count, part_gens, part_gen_count, hydrogen_capture, carbon_capture, totAZ_muonE
+# isomer information is added after every heavy A Z
 
 import numpy as np
 import sys
@@ -35,6 +36,7 @@ def events_creator(filename, isotope_filename):
     dataTypeAZ = np.dtype([
         ('A', np.int32),
         ('Z', np.int32),
+        ('IS', np.int32),
         ('Np', np.int32),
     ])
 
@@ -126,7 +128,7 @@ def events_creator(filename, isotope_filename):
             # the next line is read
             continue
 
-        A, Z, n_part = np.fromfile(file,dtype=dataTypeAZ,count=1)[0]
+        A, Z, IS, n_part = np.fromfile(file,dtype=dataTypeAZ,count=1)[0]
 
         # the number of KPART particles is indicated with np
         if n_part > 0:
@@ -144,17 +146,17 @@ def events_creator(filename, isotope_filename):
         # not the whole cylinder is tested
         if icode != 106 and (z0 > 1000 and z0 < 3500):
             isotope_count_perevent += 1
-            isotope = [A, Z]
+            isotope = [A, Z, IS]
             
             # check if we have carbon capture by neutrons
-            if isotope == [13, 6] and jtrack == 8:
+            if isotope == [13, 6, 0] and jtrack == 8:
                 carbon_capture += 1
             
             # now we define the isotope counting lists
             in_list = False
             if isotope not in totAZ:
                 totAZ.append(isotope)
-                totAZ_count.append([A, Z, 1])
+                totAZ_count.append([A, Z, IS, 1])
                 totAZ_muonE.append([isotope, [muon_energy], [1], [no_events]])
 
                 part_gens.append([isotope, particle_list])
@@ -188,7 +190,7 @@ def events_creator(filename, isotope_filename):
             # to return isotope information per muon event the following is used
             AZ_list = extract_first(AZ_count_perevent)
             if isotope not in AZ_list:
-                AZ_count_perevent.append([[A, Z], 1, no_events])
+                AZ_count_perevent.append([[A, Z, IS], 1, no_events])
             else:
                 ind = AZ_list.index(isotope)
                 AZ_count_perevent[ind][1] += 1
@@ -208,11 +210,7 @@ def events_creator(filename, isotope_filename):
     print("The isotope list is given by {0}".format(totAZ_count))
     print("The number of hydrogen neutron capture is {0} and carbon neutron capture is {1}".format(hydrogen_capture, carbon_capture))
     print("The muon energies per isotope is given by {0}".format(totAZ_muonE))
-    #print(muon_differences)
-    #print(parents_total)
-    #print(energy_list_total)
     return
-
 
 
 file_name, isotope_filename = sys.argv[1], sys.argv[2]

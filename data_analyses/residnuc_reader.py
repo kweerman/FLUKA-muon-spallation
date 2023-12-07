@@ -1,7 +1,8 @@
-# Version 1 2022 Kelly Weerman
+# Version 2 2022 Kelly Weerman
 # reads binary RESIDNUCs file and adds the counts for every job run
 # txt file returned with the total isotope count list ordered
 # in addition txt file prints the isotope count per line
+# also prints isomeric information
 
 import pickle
 import numpy as np
@@ -38,6 +39,7 @@ def isotope_list_RESIDNUC(paths, filename, job_range=[1,10]):
             try:
                 file = open(path + "{0}{1}001_RESIDNUC".format(filename,job),'rb')
             except FileNotFoundError:
+                print("{0}{1}001_RESIDNUC is not found".format(filename,job))
                 continue
 
             print("Opened {0}{1}001_RESIDNUC".format(filename,job))
@@ -61,10 +63,10 @@ def isotope_list_RESIDNUC(paths, filename, job_range=[1,10]):
                 if (Z > 1000 and Z < 3500):
                # if (Z > -1000 and Z < 1500):
                     # create a list with the count per isotope
-                    isotope = [IA, IZ]
+                    isotope = [IA, IZ, IS]
                     if isotope not in totAZ:
                         totAZ.append(isotope)
-                        totAZ_count.append([IA, IZ, 1])
+                        totAZ_count.append([IA, IZ, IS, 1])
                     else:
                         ind = totAZ.index(isotope)
                         totAZ_count[ind][-1] += 1
@@ -98,7 +100,7 @@ def isotope_names(totAZ_count, elements_file):
     last_Z_value, first_count, last_count = 0, 0, 0
 
     for isotope in sorted_isotopes:
-        A, Z, count = isotope
+        A, Z, IS, count = isotope
 
         # every time we have a new element, we sort the A numbers
         if last_Z_value != Z:
@@ -108,8 +110,8 @@ def isotope_names(totAZ_count, elements_file):
             isotope_numberlist[first_count:last_count] = sorted(numbers, key=itemgetter(1))
             first_count = last_count
 
-        isotope_nameslist.append([elements_names[Z], A, count])
-        isotope_numberlist.append([Z, A, count])
+        isotope_nameslist.append([elements_names[Z], A, IS, count])
+        isotope_numberlist.append([Z, A, IS, count])
         last_count += 1
         last_Z_value = Z
 
@@ -158,23 +160,26 @@ def print_isotopes(totAZ_count, no_muons, isotopecount_filename="AZisotopesRESID
     # uncommand the following line if you want to use the names of the isotopes
     # for line in isotope_nameslist:
     for line in isotope_numberlist:
-        A, Z, count = line
-        print(A, Z, count, "{:e}".format(ktonday(no_muons,count)))
-        newfile.write("{0} {1} {2} {3:e}\n".format(A, Z, count, ktonday(no_muons,count)))
+        A, Z, IS, count = line
+        print(A, Z, IS, count, "{:e}".format(ktonday(no_muons,count)))
+        newfile.write("{0} {1} {2} {3} {4:e}\n".format(A, Z, IS, count, ktonday(no_muons,count)))
 
     newfile.close()
     return 
 
 
-job_range = [1,150]
-paths = ['/dcache/xenon/kweerman/NewFlukaVersion_allphysicsmodelson+/']
+job_range = [1,200]
+#paths = ['/dcache/xenon/kweerman/VeryLargeBatch12Mar/']
+paths = ['/dcache/xenon/kweerman/18SepMuonEdiffMu+Mu-Fluka2023_2/']
 filename = "out_muonsXeLSLong"
 
 #isotopecount_filename="AZisotopesRESIDNUCtot.txt"
 isotopecount_filename = sys.argv[1]
 
 totAZ_count, muon_tracker = isotope_list_RESIDNUC(paths, filename, job_range)
-no_muons = muon_tracker * (10**5)
+# note: no_muons has to be changed according to input!!
+#no_muons = muon_tracker * (5*10**5)
+no_muons = muon_tracker * (1*10**5)
 print("The number of muons is {0}".format(no_muons))
 print_isotopes(totAZ_count, no_muons, isotopecount_filename)
 
