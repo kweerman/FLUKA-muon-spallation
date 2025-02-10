@@ -1,0 +1,127 @@
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+TITLE
+Muons at KamLAND traversing through the detector geometry
+* 
+* Prescision simulation choosen
+DEFAULTS                                                              PRECISIO
+*
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+BEAM         -1.0e+5                                                  MUON+
+BEAMPOS          0.0       0.0       0.0       0.0       0.0
+*
+* source used of source_muons to create distribution of muons at KamLAND
+OPEN            99.                                                   OLD
+/project/xenon/kweerman/exercises/MuonFlux-KamLAND-Generate.dat
+SOURCE          99.
+* Geometry in free format used: parallelepiped filled with iron (Fe)
+*
+GEOBEGIN                  0.01                                        COMBNAME
+    0    0             KamLAND geometry target
+* 
+* First we define the bodies in the geometry: blackbody and void sphere
+RPP BLK      -50000.0 50000.0 -50000.0 50000.0 -80000.0 80000.0
+RPP VOID     -10000.0 10000.0 -10000.0 10000.0 -20000.0 20000.0
+* Buffer oil sphere at (0, 0, 0) with radius 900cm
+* KamLS (XeLS) sphere at (0, 0, 0) with radius 650cm (192cm)
+SPH ID     0.0 0.0 0.0 900.0
+SPH OB     0.0 0.0 0.0 650.0
+SPH IB     0.0 0.0 0.0 192.0
+*
+*
+END
+* -----
+* Definition of the regions we need
+* 
+BLKBODY      5 +BLK -VOID
+VOID         5 +VOID -ID
+IDOIL        5 +ID -OB
+OBKAMLS      5 +OB -IB
+IBXELS       5 +IB 
+*
+END
+GEOEND
+*
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+* Material and compound definitions of KamLS, XeLS and buffer oil
+* ----------------
+MATERIAL        54.0       136   0.02221                              136-XE
+MATERIAL        54.0       134   0.00213                              134-XE
+MATERIAL        54.0       132   0.00004                              132-XE
+MATERIAL                         0.02437                              ENRXE
+COMPOUND     -0.9111    136-XE   -0.0872    134-XE  -0.0017   132-XE  ENRXE
+*
+MATERIAL                           0.875                              PSEUDO
+COMPOUND        12.0  HYDROGEN       9.0    CARBON                    PSEUDO
+*
+* ---- The following is for KamLS ----
+MATERIAL                          0.7526                              DODECAN
+COMPOUND        26.0  HYDROGEN      12.0    CARBON                    DODECAN
+MATERIAL                         0.00136                              PPOLS
+COMPOUND        11.0  HYDROGEN      15.0    CARBON                    PPOLS
+COMPOUND         1.0  NITROGEN       1.0    OXYGEN                    PPOLS
+* LS contributions normally by volume but calculated to weight
+MATERIAL                         0.77736                              KAMLS
+COMPOUND     -0.7718  DODECAN    -0.2264    PSEUDO   -0.0018     PPOLSKAMLS
+*
+* ---- The following is for the buffer oil ----
+MATERIAL                          0.8105                              ISOPARAFF
+COMPOUND        30.0  HYDROGEN      14.0    CARBON                    ISOPARAFF
+MATERIAL                          0.7798                              BUFFEROIL
+COMPOUND       -0.53  DODECAN     -0.47 ISOPARAFF                     BUFFEROIL
+* ---- The following is for XeLS ----
+MATERIAL                           0.731                              DECANE
+COMPOUND        22.0  HYDROGEN      10.0    CARBON                    DECANE
+MATERIAL                         0.00238                              PPOXE
+COMPOUND        11.0  HYDROGEN      15.0    CARBON                    PPOXE
+COMPOUND         1.0  NITROGEN       1.0    OXYGEN                    PPOXE
+MATERIAL                         0.76031                              LSFORXE
+COMPOUND     -0.7818    DECANE   -0.2152    PSEUDO    -0.003     PPOXELSFORXE
+* Total Xe doped Liquid Scintillator by weight
+MATERIAL                         0.78013                              XELS
+COMPOUND    -0.9687    LSFORXE   -0.0313     ENRXE                    XELS
+* not sure yet if it is necessary to input the BUFFEROIL
+* for now we can use an if-statement to skip it, but first plot what we see 
+* both from the unformatted file, (simply change it a bit, including muon info)
+* and just from the formatted file (first change formatted file, then see if we can read unformatted file
+* and after that plot all the particles)
+*
+* ----------------
+*
+* Assign materials: XE-LS for target, blackhole and vacuum
+*
+ASSIGNMA    BLCKHOLE   BLKBODY
+ASSIGNMA      VACUUM      VOID
+ASSIGNMA   BUFFEROIL     IDOIL
+ASSIGNMA       KAMLS   OBKAMLS
+ASSIGNMA        XELS    IBXELS
+*
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+* Extra physics models that have to be turned on
+PHOTONUC         1.0                        PSEUDO      XELS     
+PHYSICS          1.0                                                  COALESCE
+PHYSICS          2.0                                                  EM-DISSO
+PHYSICS          3.0                                                  EVAPORAT
+IONTRANS        -2.0
+RADDECAY         0.0       0.0  
+* Newly added physics models
+PHYSICS      20000.0        5.   0.125         2.0   10000.0     -1.0 DPMTHRES
+PHYSICS          1.0                                                  ISOMERS
+PHYSICS          1.0    0.005      0.15        2.0       2.0      2.0 IONSPLIT
+PHYSICS         -1.0       0.0    -1.0         0.0      -1.0      0.0 INFLDCAY
+PHYSICS       1000.0    1000.0    1000.0    1000.0    1000.0    1000.0PEATHRESH
+LOW-PWXS         1.0                        PSEUDO      XELS
+*
+* to activate residual nuclei scoring the following two lines are necessary
+USERWEIG          0.        0.        0.        0.        1.        0.   
+RESNUCLEI         3.        0.       60.       28.       -1.        0.XELSDET
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+* MGDRAW, EEDRAW and BXDRAW of mgdraw.f are called, output dumped in SRCEFILE
+* Also called to SODRAW for initial muon energy
+USERDUMP       200.0                 4.0     100.0                    SRCEFILE
+*
+RANDOMIZ         1.0    100.00
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7...
+*START        100000.  
+START            50.         
+*START       1000000.                      
+STOP

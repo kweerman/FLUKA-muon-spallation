@@ -1,0 +1,44 @@
+NOTE: it is important that the BEAMPOS is defined in the input file since the muon start position is derived from there (XBEAM, YBEAM, ZBEAM)
+So check if the following line is added to the input file:
+BEAMPOS          0.0       0.0      -50.       0.0       0.0
+(start at -50 and move to the right)
+The starting seed should ALWAYS be 100.00 so the python file can change this for every new run
+Also pay attention on which functions you call from mgdraw
+
+First load bashscript for correct gfortran version:
+. fluka2023.3.1.bash
+
+--- for KamLAND ---
+$FLUPRO/flutil/fff mgdraw_geometry.f
+$FLUPRO/flutil/fff mdstck.f
+$FLUPRO/flutil/fff usrrnc.f
+$FLUPRO/flutil/fff source_muons.f
+$FLUPRO/flutil/ldpmqmd -o XeLSgeometry -m fluka mgdraw_geometry.o mdstck.o source_muons.o usrrnc.o 
+$FLUPRO/flutil/rfluka -e /project/xenon/kweerman/exercises/FLUKA-muon-spallation/user_routines/geometry/XeLSgeometry -N0 -M1 muons_KamLAND
+
+--- for XeLS ---
+NOTE: LINE WITH XFLK(NPFLKA) SHOULD BE UNCOMMENTED
+$FLUPRO/flutil/fff mgdraw_usdraw.f
+$FLUPRO/flutil/fff mdstck.f
+$FLUPRO/flutil/fff usrrnc.f
+$FLUPRO/flutil/fff source_muons.f
+$FLUPRO/flutil/ldpmqmd -o XeLS -m fluka mgdraw_usdraw.o mdstck.o source_muons.o usrrnc.o 
+$FLUPRO/flutil/rfluka -e ./XeLS -N0 -M1 muons_XeLS
+
+
+--- for XeBeam ---
+$FLUPRO/flutil/fff usrrnc_form.f
+$FLUPRO/flutil/fff mdstck.f
+$FLUPRO/flutil/fff mgdraw_usdraw.f
+$FLUPRO/flutil/ldpmqmd -o XeBeam -m fluka mdstck.o usrrnc_form.o mgdraw_usdraw.o
+$FLUPRO/flutil/rfluka -e ./XeBeam -N0 -M1 XeBeamToProton
+
+
+--- for SHOWERS ---
+$FLUPRO/flutil/fff mgdraw_formatted.f 
+or
+$FLUPRO/flutil/fff mgdraw_geometry_fullevent.f
+$FLUPRO/flutil/fff usrrnc_form.f
+$FLUPRO/flutil/fff fluscw_form.f
+$FLUPRO/flutil/ldpmqmd -o XeLSformShowers -m fluka mgdraw_geometry_fullevent.o usrrnc_form.o fluscw_form.o
+$FLUPRO/flutil/rfluka -e /userdata/work/kweerman/FLUKA/FLUKA-muon-spallation/user_routines/XeLSformShowers -N0 -M1 muons_XeLS

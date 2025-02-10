@@ -1,0 +1,4 @@
+*.o
+*.map
+XeLSgeometry
+input_files/test/
